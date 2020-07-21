@@ -25,7 +25,7 @@ class Profil
     private $libelle;
 
     /**
-     * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil")
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil", orphanRemoval=true)
      */
     private $users;
 
@@ -81,4 +81,6 @@ class Profil
 
         return $this;
     }
+
+    
 }

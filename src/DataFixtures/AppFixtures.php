@@ -1,43 +1,45 @@
 <?php
 
 namespace App\DataFixtures;
+
 use Faker\Factory;
 use App\Entity\User;
 use App\Entity\Profil;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
 {
+    public function __construct(UserPasswordEncoderInterface $encoder) {
+        $this->encoder=$encoder;
+    }
     public function load(ObjectManager $manager)
     {
-
-        // generer les 3 profils et 3 users
-
-        $donnees =  Factory::create('fr_FR');
-         for ($i=0; $i <3 ; $i++) { 
-            $user = new User();
-            $profil= new Profil();
-            $user->setPrenom($donnees->firstname)
-                 ->setNom($donnees->name)
-                 ->setLogin($donnees->username)
-                 ->setPassword("test")
-                 ->setEmail($donnees->email)
-                 ->setAvatar($donnees->text);
-            if($i==0){
-                $profil->setLibelle("admin");
-            }
-            elseif($i==1){
-                $profil->setLibelle("formateur");
-            }else{
-                $profil= $profil->setLibelle("cm");
-            }
-            $user->setProfil($profil);
+        
+    $faker = Factory::create('fr_FR');
+        $profils=['ADMIN','FORMATEUR','CM'];
+        for ($i=0; $i < 3; $i++) { 
             
-        $manager->persist($profil);
-        $manager->persist($user);
-         }
-
+            $profil = new Profil();
+            $profil->setLibelle($profils[$i]);
+            $manager->persist($profil);
+            $manager->flush();
+            for ($j=0; $j < 3 ; $j++) { 
+            $user = new User();
+            $user->setPrenom($faker->firstName)
+                 ->setNom($faker->lastName)
+                 ->setEmail($faker->safeEmail)
+                 ->setAvatar($faker->imageUrl(640,480,'cats'))
+                 ->setStatut("on")
+                 ->setProfil($profil)
+                 ->setUsername(strtolower($profils[$i].($j+1)))
+                 ->setPassword($this->encoder->encodePassword($user, "password".($j+1)));
+                 
+            $manager->persist($user);
+        }
+        }
+         
         $manager->flush();
     }
 }
