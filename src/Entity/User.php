@@ -2,12 +2,37 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ApiResource(
+   *     attributes={"security"="is_granted('ROLE_ADMIN') ","pagination_items_per_page"=5},
+    *     collectionOperations={
+    *         "post"={"security"="is_granted('ROLE_ADMIN') ", "security_message"="Seul un admin peut faire cette action.","path"="admin/users" },
+    *         "get"={"security"="is_granted('ROLE_ADMIN')  ", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/users",
+    *         "normalization_context"={"groups"={"user_read","user_details_read"}}},
+    *         "get_apprenants"={
+    *           "method"="GET",
+    *           "path"="/apprenants" ,
+    *           "access_control"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') )",
+    *           "access_control_message"="Vous n'avez pas access à cette Ressource",
+    *           "route_name"="apprenants_liste",
+    *           "normalization_context"={"groups"={"apprenant_read"}}
+    *          }
+    *     },
+    *     
+    *     itemOperations={
+    *         "get"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",}, 
+    *         "delete"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *         "patch"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *         "put"={"security_post_denormalize"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *  }
+ * )
  */
 class User implements UserInterface
 {
@@ -20,6 +45,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\NotBlank
      */
     private $username;
 
@@ -28,26 +54,33 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Assert\NotBlank
      */
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="blob", nullable=true)
+     * @Assert\NotBlank
      */
     private $avatar;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
      */
     private $prenom;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Email(
+     *  message = "Email '{{ value }}' est invalide !."
+     *)
      */
     private $email;
 
@@ -59,6 +92,7 @@ class User implements UserInterface
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank
      */
     private $profil;
 
@@ -140,7 +174,7 @@ class User implements UserInterface
         return $this->avatar;
     }
 
-    public function setAvatar(string $avatar): self
+    public function setAvatar(blob $avatar): self
     {
         $this->avatar = $avatar;
 

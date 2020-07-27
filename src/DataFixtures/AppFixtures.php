@@ -18,8 +18,8 @@ class AppFixtures extends Fixture
     {
         
     $faker = Factory::create('fr_FR');
-        $profils=['ADMIN','FORMATEUR','CM'];
-        for ($i=0; $i < 3; $i++) { 
+        $profils=['ADMIN','FORMATEUR','CM','APPRENANT'];
+        for ($i=0; $i <= 3; $i++) { 
             
             $profil = new Profil();
             $profil->setLibelle($profils[$i]);
@@ -30,12 +30,13 @@ class AppFixtures extends Fixture
             $user->setPrenom($faker->firstName)
                  ->setNom($faker->lastName)
                  ->setEmail($faker->safeEmail)
-                 ->setAvatar($faker->imageUrl(640,480,'cats'))
                  ->setStatut("on")
                  ->setProfil($profil)
                  ->setUsername(strtolower($profils[$i].($j+1)))
                  ->setPassword($this->encoder->encodePassword($user, "password".($j+1)));
-                 
+            $avatar = fopen($faker->imageUrl(640,480,'cats'),"rb");
+            fclose($avatar);
+            $user->setAvatar($avatar);
             $manager->persist($user);
         }
         }
