@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -14,7 +16,34 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="profil", type="string")
  * @ORM\DiscriminatorMap({"ADMIN" = "User", "APPRENANT" = "Apprenant", "FORMATEUR" = "Formateur", "CM" = "Cm"})
- * @ApiResource()
+ * @ApiResource(
+ *     attributes={"pagination_items_per_page"=10},
+    *     collectionOperations={
+    *         "post"={
+    *          "method"="POST",
+    *          "security"="is_granted('ROLE_ADMIN') ",
+    *          "security_message"="Seul un admin peut faire cette action.",
+    *          "path"="admin/users"
+    *           },
+    *          "get"={
+ *              "security"="is_granted('ROLE_ADMIN')", 
+ *              "security_message"="Vous n'avez pas acces a cette ressource.",
+ *              "path"="admin/users",
+    *           "normalization_context"={"groups"={"user_read"}}
+ *              }
+    *     },
+    *     
+    *     itemOperations={
+    *         "get"={"security"="is_granted('ROLE_ADMIN')",
+    *            "security_message"="Seul un admin peut faire cette action.",
+    *            "path"="admin/users/{id}", 
+    *            "normalization_context"={"groups"={"user_details_read"}}
+    *            }, 
+    *         "delete"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *         "patch"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *         "put"={"security_post_denormalize"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *  }
+ * )
  */
 class User implements UserInterface
 {
@@ -22,45 +51,47 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"user_read","user_details_read"})
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"user_read","user_details_read"})
      */
-    private $username;
+    protected $username;
 
     /**
-     *
+     * @Groups({"user_read","user_details_read"})
      */
-    private $roles = [];
+    protected $roles = [];
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
      */
-    private $password;
+    protected $password;
 
     /**
      * @ORM\Column(type="blob", nullable=false)
      * @Assert\NotBlank(message = "avatar can't be null")
      * @Groups({"user_details_read"})
      */
-    private $avatar;
+    protected $avatar;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message = "prenom can't be null")
      * @Groups({"user_read","user_details_read"})
      */
-    private $prenom;
+    protected $prenom;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message = "nom can't be null")
      * @Groups({"user_read","user_details_read"})
      */
-    private $nom;
+    protected $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -70,20 +101,30 @@ class User implements UserInterface
      *)
      *@Groups({"user_details_read"})
      */
-    private $email;
+    protected $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"user_details_read"})
      */
-    private $statut;
+    protected $statut;
 
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"user_details_read"})
      */
-    private $profil;
+    protected $profil;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Promo::class, mappedBy="createdBy")
+     */
+    private $promos;
+
+    public function __construct()
+    {
+        $this->promos = new ArrayCollection();
+    }
 
 
     public function getId(): ?int
@@ -115,7 +156,7 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE' . $this->profil->getLibelle();
+        $roles[] = 'ROLE_' . $this->profil->getLibelle();
 
         return array_unique($roles);
     }
@@ -159,10 +200,12 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-
     public function getAvatar()
     {
-        return $this->avatar;
+        $data = stream_get_contents($this->avatar);
+        fclose($this->avatar);
+
+       return base64_encode($data);
     }
 
     public function setAvatar($avatar): self
@@ -228,6 +271,37 @@ class User implements UserInterface
     public function setProfil(?Profil $profil): self
     {
         $this->profil = $profil;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Promo[]
+     */
+    public function getPromos(): Collection
+    {
+        return $this->promos;
+    }
+
+    public function addPromo(Promo $promo): self
+    {
+        if (!$this->promos->contains($promo)) {
+            $this->promos[] = $promo;
+            $promo->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromo(Promo $promo): self
+    {
+        if ($this->promos->contains($promo)) {
+            $this->promos->removeElement($promo);
+            // set the owning side to null (unless already changed)
+            if ($promo->getCreatedBy() === $this) {
+                $promo->setCreatedBy(null);
+            }
+        }
 
         return $this;
     }

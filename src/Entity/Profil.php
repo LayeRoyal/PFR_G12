@@ -15,16 +15,17 @@ use Symfony\Component\Validator\Constraints as Assert;
  *  @ApiResource(
     *     attributes={"security"="is_granted('ROLE_ADMIN')","pagination_items_per_page"=10},
     *     collectionOperations={
-    *         "post"={"security"="is_granted('ROLE_ADMIN')", "security_message"="Seul un admin peut faire cette action.","path"="admin/profils",},
-    *         "get"={"security"="is_granted('ROLE_ADMIN')", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/profils",
-    *         "normalization_context"={"groups"={"profil_read","profil_details_read"}}},
+    *         "post"={ "security_message"="Seul un admin peut faire cette action.","path"="admin/profils",},
+    *         "get"={"security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/profils",
+    *         "normalization_context"={"groups"={"profil_read"}}
+    *         }
     *     },
     *     
     *     itemOperations={
-    *         "get"={"security"="is_granted('ROLE_ADMIN')","security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/profils/{id}",}, 
-    *         "delete"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
-    *         "patch"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
-    *         "put"={"security_post_denormalize"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
+    *         "get"={"security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/profils/{id}", "normalization_context"={"groups"={"profil_detail_read"}}}, 
+    *         "delete"={"security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
+    *         "patch"={"security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
+    *         "put"={"security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
     *  }
   * )
  */
@@ -34,19 +35,20 @@ class Profil
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     *  @Groups({"user_read"})
+     * @Groups({"profil_read","profil_detail_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message = "libelle can't be null")
-     *  @Groups({"user_read"})
+     * @Groups({"profil_read","profil_detail_read"})
      */
     private $libelle;
 
     /**
      * @ORM\OneToMany(targetEntity=User::class, mappedBy="profil", orphanRemoval=true)
+     * @Groups({"profil_detail_read"})
      */
     private $users;
 

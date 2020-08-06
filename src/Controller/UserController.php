@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ class UserController extends AbstractController
 {
     /**
      * @Route(
-     *     path="/api/admin",
+     *     path="/api/admin/users",
      *     methods={"POST"}
      * )
      */
@@ -55,8 +56,9 @@ class UserController extends AbstractController
             ->setBody("mot de passe est $password , pour " . $username);
         $mailer->send($message);
 
-        return  new JsonResponse($user, Response::HTTP_CREATED);
+        return  $this->json($user, Response::HTTP_CREATED);
 
         fclose($avatar);
     }
+
 }
