@@ -2,66 +2,81 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Repository\ApprenantRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class ApprenantController extends AbstractController
 {
     /**
-    * @Route(
-    *     name="apprenant_liste",
-    *     path="api/apprenants",
-    *     methods={"GET"},
-    *     defaults={
-    *         "_controller"="\app\Controller\ApprenantController::getApprenant",
-    *         "_api_resource_class"=User::class,
-    *         "_api_collection_operation_name"="get_apprenants"
-    *     }
-    * )
-    */
-    public function getApprenant(UserRepository $repo)
+     * @Route(
+     *     path="/api/apprenants",
+     *     methods={"POST"}
+     * )
+     */
+    public function addApprenant(Request $request, \Swift_Mailer $mailer, UserPasswordEncoderInterface $encoder, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
     {
-        $apprenant = $repo -> findByProfil("APPRENANT");
-        return $this -> json($apprenant, Response::HTTP_OK,);
+        $user = $request->request->all();
+        $avatar = $request->files->get("avatar");
+        $avatar = fopen($avatar->getRealPath(), "rb");
+        $user["avatar"] = $avatar;
+        $username = $user['username'];
+        $user = $serializer->denormalize($user, "App\Entity\Apprenant");
+        $errors = $validator->validate($user);
+        if (count($errors)) {
+            $errors = $serializer->serialize($errors, "json");
+            return new JsonResponse($errors, Response::HTTP_BAD_REQUEST, [], true);
+        }
+        function randomPassword($length = 10)
+        {
+            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $charactersLength = strlen($characters);
+            $randomString = '';
+            for ($i = 0; $i < $length; $i++) {
+                $randomString .= $characters[rand(0, $charactersLength - 1)];
+            }
+            return $randomString;
+        }
+        $password = randomPassword();
+        $user->setPassword($encoder->encodePassword($user, $password));
+        $manager->persist($user);
+        $manager->flush();
+        //Envoi de l'Email de confirmation 
+
+        $message = (new \Swift_Message('Orange Digital Center'))
+            ->setFrom('abdoulaye.drame1@uvs.edu.sn')
+            ->setTo($user->getEmail())
+            ->setBody("mot de passe est $password , pour " . $username);
+        $mailer->send($message);
+
+        return  new JsonResponse($user, Response::HTTP_CREATED);
+
+        fclose($avatar);
     }
 
     /**
-    * @Route(
-    *     name="apprenant_find",
-    *     path="api/apprenants/{id}",
-    *     methods={"GET"},
-    *     defaults={
-    *         "_controller"="\app\Controller\ApprenantController::getApprenantById",
-    *         "_api_resource_class"=User::class,
-    *         "_api_collection_operation_name"="get_apprenant"
-    *     }
-    * )
-    */
-    public function getApprenantById(UserRepository $repo,SerializerInterface $serializer, $id){
-        $apprenant = $repo->find($id);
-        $role = $apprenant->getRoles();
-        if($role[0]=="ROLE_APPRENANT")
-        {
-            $apprenant = $serializer->serialize($apprenant,"json");
-            return $this -> json($apprenant, Response::HTTP_OK,);
-               
-        }
-        else
-        {
-            return $this ->json(null, Response::HTTP_NOT_FOUND,);
-        }
- 
-        
-        }
-    
-    public function index()
+     * @Route(
+     *     path="api/apprenants",
+     *     methods={"GET"},
+     * )
+     */
+    public function getApprenant(ApprenantRepository $repo, SerializerInterface $serializer)
     {
-        return $this->render('apprenant/index.html.twig', [
-            'controller_name' => 'ApprenantController',
-        ]);
+        $apprenant = $repo->findAll();
+        dd($apprenant);
+        foreach ($apprenant as $key => $value) {
+            $avat = $value->getAvatar();
+            $avatar = stream_get_meta_data($avat);
+            $value->setAvatar($avatar);
+        }
+        return $this->json($apprenant, Response::HTTP_OK,);
     }
 }

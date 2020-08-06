@@ -2,9 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Entity\Profil;
-use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,36 +16,47 @@ class UserController extends AbstractController
 {
     /**
      * @Route(
-     *     path="/api/admin/users",
-     *     methods={"POST"},
-     *     defaults={
-     *          "__controller"="App\Controller\UserController::addUser",
-     *          "__api_resource_class"=User::class,
-     *          "__api_collection_operation_name"="add_user"
-     *     }
+     *     path="/api/admin",
+     *     methods={"POST"}
      * )
-    */
-    public function addUser(Request $request,UserPasswordEncoderInterface $encoder,SerializerInterface $serializer,ValidatorInterface $validator,ProfilRepository $profil,EntityManagerInterface $manager)
+     */
+    public function addUser(Request $request, \Swift_Mailer $mailer, UserPasswordEncoderInterface $encoder, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
     {
         $user = $request->request->all();
-        $profil_id = $request->request->get("profil_id");
-        $profil = $profil->find($profil_id);
         $avatar = $request->files->get("avatar");
-        $avatar = fopen($avatar->getRealPath(),"rb");
+        $avatar = fopen($avatar->getRealPath(), "rb");
         $user["avatar"] = $avatar;
-        $user = $serializer->denormalize($user,"App\Entity\User");
+        $username = $user['username'];
+        $user = $serializer->denormalize($user, "App\Entity\User");
         $errors = $validator->validate($user);
-        if (count($errors)){
-            $errors = $serializer->serialize($errors,"json");
-            return new JsonResponse($errors,Response::HTTP_BAD_REQUEST,[],true);
+        if (count($errors)) {
+            $errors = $serializer->serialize($errors, "json");
+            return new JsonResponse($errors, Response::HTTP_BAD_REQUEST, [], true);
         }
-        $user -> setProfil($profil);
-        $password = $user->getPassword();
-        $user->setPassword($encoder->encodePassword($user,$password));
+        function randomPassword($length = 10)
+        {
+            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $charactersLength = strlen($characters);
+            $randomString = '';
+            for ($i = 0; $i < $length; $i++) {
+                $randomString .= $characters[rand(0, $charactersLength - 1)];
+            }
+            return $randomString;
+        }
+        $password = randomPassword();
+        $user->setPassword($encoder->encodePassword($user, $password));
         $manager->persist($user);
         $manager->flush();
-        fclose($avatar);
-        return $this->json($user,Response::HTTP_CREATED);
-    }
+        //Envoi de l'Email de confirmation 
 
+        $message = (new \Swift_Message('Orange Digital Center'))
+            ->setFrom('adelinomendes1995@gmail.com')
+            ->setTo($user->getEmail())
+            ->setBody("mot de passe est $password , pour " . $username);
+        $mailer->send($message);
+
+        return  new JsonResponse($user, Response::HTTP_CREATED);
+
+        fclose($avatar);
+    }
 }

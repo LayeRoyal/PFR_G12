@@ -53,6 +53,5 @@ security:
         # - { path: ^/profile, roles: ROLE_USER }
 
         - { path: ^/api/login, roles: [ROLE_USER,IS_AUTHENTICATED_ANONYMOUSLY] }
-        - { path: ^/api$, roles: [ROLE_USER,IS_AUTHENTICATED_ANONYMOUSLY] }
-        - { path: ^/api/apprenants, roles: [ROLE_ADMIN, ROLE_FORMATEUR] }
+        - { path: ^/api$, roles: [ROLE_User,IS_AUTHENTICATED_ANONYMOUSLY] }
         - { path: ^/api,       roles:[ROLE_USER, IS_AUTHENTICATED_FULLY ] }

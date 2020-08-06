@@ -35,18 +35,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->persist($user);
         $this->_em->flush();
     }
-    
-     public function findByProfil($value)
-        {
+
+    public function findByProfil($value)
+    {
         return $this->createQueryBuilder('u')
-        ->innerJoin('u.profil', 'p')
-        ->andWhere('p.libelle = :val')
-        ->setParameter('val', $value)
-        ->orderBy('u.id', 'ASC')
-        ->getQuery()
-        ->getResult()
-        ;
-        }
+            ->where('u.username = :val')
+            ->setParameter('val', $value)
+            ->orderBy('u.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
     // /**
     //  * @return User[] Returns an array of User objects
@@ -64,7 +62,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ;
     }
     */
-    
+
     /*
     public function findOneBySomeField($value): ?User
     {
