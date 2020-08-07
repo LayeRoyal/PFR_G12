@@ -2,10 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use App\Repository\ProfilRepository;
-use App\Repository\ApprenantRepository;
+use App\Repository\FormateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,11 +12,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class ApprenantController extends AbstractController
+class FormateurController extends AbstractController
 {
     /**
      * @Route(
-     *     path="/api/apprenants",
+     *     path="/api/formateurs",
      *     methods={"POST"}
      * )
      */
@@ -27,11 +24,10 @@ class ApprenantController extends AbstractController
     {
         $apprenant = $request->request->all();
         $avatar = $request->files->get("avatar");
-        $genre=$apprenant['genre'];
         $avatar = fopen($avatar->getRealPath(), "rb");
         $apprenant["avatar"] = $avatar;
         $username = $apprenant['username'];
-        $apprenant = $serializer->denormalize($apprenant, "App\Entity\Apprenant");
+        $apprenant = $serializer->denormalize($apprenant, "App\Entity\Formateur");
         $errors = $validator->validate($apprenant);
         if (count($errors)) {
             $errors = $serializer->serialize($errors, "json");
@@ -48,8 +44,7 @@ class ApprenantController extends AbstractController
             return $randomString;
         }
         $password = randomPassword();
-        $apprenant->setPassword($encoder->encodePassword($apprenant, $password))
-             ->setGenre($genre);
+        $apprenant->setPassword($encoder->encodePassword($apprenant, $password));
         $manager->persist($apprenant);
         $manager->flush();
         //Envoi de l'Email de confirmation 

@@ -147,6 +147,11 @@ class Promo
      */
     private $groupes;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Referentiel::class, inversedBy="promos")
+     */
+    private $referentiel;
+
     public function __construct()
     {
         $this->groupes = new ArrayCollection();
@@ -304,6 +309,18 @@ class Promo
                 $groupe->setPromo(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getReferentiel(): ?Referentiel
+    {
+        return $this->referentiel;
+    }
+
+    public function setReferentiel(?Referentiel $referentiel): self
+    {
+        $this->referentiel = $referentiel;
 
         return $this;
     }

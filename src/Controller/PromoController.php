@@ -11,19 +11,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class PromoController extends AbstractController
 {
 
-    /**
-    * @Route(
-    *     path="api/admin/promo",
-    *     methods={"GET"}
-    * )
-    */  
-
-    public function listPromo()
-    {   
-        $tab=['ListPromo'];
-        dd($tab);
-
-    }
 
       /**
     * @Route(
