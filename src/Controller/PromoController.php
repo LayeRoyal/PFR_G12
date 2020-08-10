@@ -163,20 +163,21 @@ class PromoController extends AbstractController
     /**
     * @Route(
     *     path="api/admin/promo/{id}/apprenants",
-    *     methods={"PUT"},
+    *     methods={"PATCH"},
     *     defaults={
-    *         "__controller"="\app\Controller\PromoController::putApprenantPromo",
+    *         "__controller"="\app\Controller\PromoController::patchApprenantPromo",
     *         "__api_resource_class"=Promo::class,
     *         "__api_collection_operation_name"="add_del_students_one_promo"
     *     }
     * )
     */  
 
-    public function putApprenantPromo()
+    public function patchApprenantPromo(Request $req,PromoRepository $repo, ApprenantRepository $apprenant)
     {
-        $tab=['ajout supp apprenants d\'une promo'];
-        dd($tab);
-
+        $promo=$repo->find($id);
+        $student=$apprenant->find($req->request->get('apprenant'));
+        $promo->addApprenant($student);
+        
     }
 
     /**

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GroupeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -79,6 +81,22 @@ class Groupe
      */
     private $promo;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Formateur::class, inversedBy="groupes")
+     */
+    private $formateurs;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Apprenant::class, inversedBy="groupes")
+     */
+    private $apprenants;
+
+    public function __construct()
+    {
+        $this->formateurs = new ArrayCollection();
+        $this->apprenants = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -152,6 +170,58 @@ class Groupe
     public function setPromo(?Promo $promo): self
     {
         $this->promo = $promo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Formateur[]
+     */
+    public function getFormateurs(): Collection
+    {
+        return $this->formateurs;
+    }
+
+    public function addFormateur(Formateur $formateur): self
+    {
+        if (!$this->formateurs->contains($formateur)) {
+            $this->formateurs[] = $formateur;
+        }
+
+        return $this;
+    }
+
+    public function removeFormateur(Formateur $formateur): self
+    {
+        if ($this->formateurs->contains($formateur)) {
+            $this->formateurs->removeElement($formateur);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Apprenant[]
+     */
+    public function getApprenants(): Collection
+    {
+        return $this->apprenants;
+    }
+
+    public function addApprenant(Apprenant $apprenant): self
+    {
+        if (!$this->apprenants->contains($apprenant)) {
+            $this->apprenants[] = $apprenant;
+        }
+
+        return $this;
+    }
+
+    public function removeApprenant(Apprenant $apprenant): self
+    {
+        if ($this->apprenants->contains($apprenant)) {
+            $this->apprenants->removeElement($apprenant);
+        }
 
         return $this;
     }

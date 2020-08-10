@@ -64,6 +64,11 @@ class ProfilSortie
      */
     private $apprenants;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="profilSorties")
+     */
+    private $createdBy;
+
     public function __construct()
     {
         $this->apprenants = new ArrayCollection();
@@ -113,6 +118,18 @@ class ProfilSortie
                 $apprenant->setProfilSortie(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
 
         return $this;
     }

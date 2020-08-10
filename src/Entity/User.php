@@ -20,7 +20,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *     attributes={"pagination_items_per_page"=10},
     *     collectionOperations={
     *         "post"={
-    *          "method"="POST",
     *          "security"="is_granted('ROLE_ADMIN') ",
     *          "security_message"="Seul un admin peut faire cette action.",
     *          "path"="admin/users"
@@ -39,9 +38,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
     *            "path"="admin/users/{id}", 
     *            "normalization_context"={"groups"={"user_details_read"}}
     *            }, 
-    *         "delete"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
-    *         "patch"={"security"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
-    *         "put"={"security_post_denormalize"="is_granted('ROLE_ADMIN')","security_message"="Seul un admin peut faire cette action.","path"="admin/users/{id}",},
+    *         "delete"={"security"="is_granted('ROLE_ADMIN')",
+    *                   "security_message"="Seul un admin peut faire cette action.",
+    *                   "path"="admin/users/{id}"},
+    *         "put"={"security_post_denormalize"="is_granted('ROLE_ADMIN')",
+    *                "security_message"="Seul un admin peut faire cette action.",
+    *                "path"="admin/users/{id}"}
     *  }
  * )
  */
@@ -121,9 +123,21 @@ class User implements UserInterface
      */
     private $promos;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ProfilSortie::class, mappedBy="createdBy")
+     */
+    private $profilSorties;
+
+    /**
+     * @ORM\OneToMany(targetEntity=GroupeCompetence::class, mappedBy="createdBy", orphanRemoval=true)
+     */
+    private $groupeCompetences;
+
     public function __construct()
     {
         $this->promos = new ArrayCollection();
+        $this->profilSorties = new ArrayCollection();
+        $this->groupeCompetences = new ArrayCollection();
     }
 
 
@@ -300,6 +314,68 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($promo->getCreatedBy() === $this) {
                 $promo->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ProfilSortie[]
+     */
+    public function getProfilSorties(): Collection
+    {
+        return $this->profilSorties;
+    }
+
+    public function addProfilSorty(ProfilSortie $profilSorty): self
+    {
+        if (!$this->profilSorties->contains($profilSorty)) {
+            $this->profilSorties[] = $profilSorty;
+            $profilSorty->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProfilSorty(ProfilSortie $profilSorty): self
+    {
+        if ($this->profilSorties->contains($profilSorty)) {
+            $this->profilSorties->removeElement($profilSorty);
+            // set the owning side to null (unless already changed)
+            if ($profilSorty->getCreatedBy() === $this) {
+                $profilSorty->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|GroupeCompetence[]
+     */
+    public function getGroupeCompetences(): Collection
+    {
+        return $this->groupeCompetences;
+    }
+
+    public function addGroupeCompetence(GroupeCompetence $groupeCompetence): self
+    {
+        if (!$this->groupeCompetences->contains($groupeCompetence)) {
+            $this->groupeCompetences[] = $groupeCompetence;
+            $groupeCompetence->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupeCompetence(GroupeCompetence $groupeCompetence): self
+    {
+        if ($this->groupeCompetences->contains($groupeCompetence)) {
+            $this->groupeCompetences->removeElement($groupeCompetence);
+            // set the owning side to null (unless already changed)
+            if ($groupeCompetence->getCreatedBy() === $this) {
+                $groupeCompetence->setCreatedBy(null);
             }
         }
 

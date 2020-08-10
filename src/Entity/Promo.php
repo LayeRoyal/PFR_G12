@@ -62,7 +62,7 @@ use Doctrine\ORM\Mapping as ORM;
     *            },
     *         "put"={"security_post_denormalize"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","security_message"="Seul un admin peut faire cette action.","path"="admin/promo/{id}",},
     *            "add_del_students_one_promo"={
-    *              "method"="PUT",
+    *              "method"="PATCH",
     *              "path"="/admin/promo/{id}/apprenants",          
     *              "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))",
     *              "security_message"="Vous n'avez pas access à cette Ressource"
@@ -152,9 +152,21 @@ class Promo
      */
     private $referentiel;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Formateur::class, inversedBy="promos")
+     */
+    private $formateurs;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Apprenant::class, mappedBy="promo", orphanRemoval=true)
+     */
+    private $apprenants;
+
     public function __construct()
     {
         $this->groupes = new ArrayCollection();
+        $this->formateurs = new ArrayCollection();
+        $this->apprenants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -321,6 +333,63 @@ class Promo
     public function setReferentiel(?Referentiel $referentiel): self
     {
         $this->referentiel = $referentiel;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Formateur[]
+     */
+    public function getFormateurs(): Collection
+    {
+        return $this->formateurs;
+    }
+
+    public function addFormateur(Formateur $formateur): self
+    {
+        if (!$this->formateurs->contains($formateur)) {
+            $this->formateurs[] = $formateur;
+        }
+
+        return $this;
+    }
+
+    public function removeFormateur(Formateur $formateur): self
+    {
+        if ($this->formateurs->contains($formateur)) {
+            $this->formateurs->removeElement($formateur);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Apprenant[]
+     */
+    public function getApprenants(): Collection
+    {
+        return $this->apprenants;
+    }
+
+    public function addApprenant(Apprenant $apprenant): self
+    {
+        if (!$this->apprenants->contains($apprenant)) {
+            $this->apprenants[] = $apprenant;
+            $apprenant->setPromo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeApprenant(Apprenant $apprenant): self
+    {
+        if ($this->apprenants->contains($apprenant)) {
+            $this->apprenants->removeElement($apprenant);
+            // set the owning side to null (unless already changed)
+            if ($apprenant->getPromo() === $this) {
+                $apprenant->setPromo(null);
+            }
+        }
 
         return $this;
     }

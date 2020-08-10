@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Entity\GroupeCompetence;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ReferentielRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -16,8 +18,8 @@ use Symfony\Component\Validator\Constraints as Assert;
    *     attributes={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","pagination_items_per_page"=2},
     *     collectionOperations={
     *         "post"={"security"="is_granted('ROLE_ADMIN'))", "security_message"="vous n'avez le droit de faire cette action de suppression, seul l'admin.","path"="admin/referentiels"},
-    *         "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/referentiels",
-    *         "normalization_context"={"groups"={"ref_read"}}},
+    *         "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/referentiels"
+    *         },
     *         "get_groupeCompetences"={"method"="get", "security"="is_granted('ROLE_ADMIN') or  is_granted('ROLE_CM') ", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/referentiels/groupe_competences"},
     *     },
     *     
@@ -25,6 +27,9 @@ use Symfony\Component\Validator\Constraints as Assert;
     *         "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT')","security_message"="Vous n'etes pas autorisé à faire cette action de lister.","path"="admin/referentiels/{id}"}, 
     *         "get_groupeCompetences"={"method"="get", "security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT')","security_message"="Vous n'etes pas autorisé à faire cette action de lister.","path"="admin/referentiels/{id}/groupe_competences/{num}"}, 
     *         "put"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT'))","security_message"="Vous n'etes pas autorisé à faire cette action de modification.","path"="admin/referentiels/{id}"},
+    *     "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
+    *              "security_message"="Seul l'admin a accès à cette ressource",
+    *              "path"="/admin/referentiels/{id}/archivage"}
     *  }
  * )
  */
@@ -79,6 +84,11 @@ class Referentiel
      * @ORM\OneToMany(targetEntity=Promo::class, mappedBy="referentiel")
      */
     private $promos;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $archivage;
 
     public function __construct()
     {
@@ -204,6 +214,18 @@ class Referentiel
                 $promos->setReferentiel(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getArchivage(): ?bool
+    {
+        return $this->archivage;
+    }
+
+    public function setArchivage(bool $archivage): self
+    {
+        $this->archivage = $archivage;
 
         return $this;
     }

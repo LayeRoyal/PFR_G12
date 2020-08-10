@@ -61,4 +61,5 @@ class UserController extends AbstractController
         fclose($avatar);
     }
 
+   
 }

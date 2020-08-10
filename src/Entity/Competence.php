@@ -2,38 +2,37 @@
 
 namespace App\Entity;
 
-use App\Entity\Competence;
+
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CompetenceRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\GroupeCompetenceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
  * attributes={"pagination_items_per_page"=3},
  * collectionOperations={
- *          "get"={"path"="/admin/grpecompetences"},
+ *          "get"={"path"="/admin/competences"},
  *          "post"={"security"="is_granted('ROLE_ADMIN') ",
  *              "security_message"="Seul l'admin a accès à cette ressource",
- *              "path"="/admin/grpecompetences"}
+ *              "path"="/admin/competences"}
  * },
  * itemOperations={
  *          "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM')",
  *              "security_message"="Seul l'admin ou le formateur ou le CM a accès à cette ressource",
- *              "path"="/admin/grpecompetences/{id}"},
+ *              "path"="/admin/competences/{id}"},
  *          "put"={"security"="is_granted('ROLE_ADMIN') ",
  *              "security_message"="Seul l'admin a accès à cette ressource",
- *              "path"="/admin/grpecompetences/{id}"},
+ *              "path"="/admin/competences/{id}"},
  *          "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
  *              "security_message"="Seul l'admin a accès à cette ressource",
- *              "path"="/admin/grpecompetences/{id}/archivage"}
+ *              "path"="/admin/competences/{id}/archivage"}
  * }
  * )
- * @ORM\Entity(repositoryClass=GroupeCompetenceRepository::class)
+ * @ORM\Entity(repositoryClass=CompetenceRepository::class)
  */
-class GroupeCompetence
+class Competence
 {
     /**
      * @ORM\Id()
@@ -48,26 +47,20 @@ class GroupeCompetence
     private $libelle;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="string", length=255)
      */
     private $descriptif;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Referentiel::class, mappedBy="competences")
+     * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competence")
      */
-    private $referentiels;
-
-     /**
-     * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupecompetences", cascade={"persist"})
-     */
-    private $competence;
+    private $groupeCompetences;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="groupeCompetences")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity=NiveauEvaluation::class, mappedBy="competence")
      */
-    private $createdBy;
+    private $niveauEvaluations;
 
     /**
      * @ORM\Column(type="boolean")
@@ -76,8 +69,8 @@ class GroupeCompetence
 
     public function __construct()
     {
-        $this->referentiels = new ArrayCollection();
-        $this->competence = new ArrayCollection();
+        $this->groupeCompetences = new ArrayCollection();
+        $this->niveauEvaluations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -109,68 +102,61 @@ class GroupeCompetence
         return $this;
     }
 
-     /**
-     * @return Collection|Competence[]
+    /**
+     * @return Collection|GroupeCompetence[]
      */
-    public function getCompetence(): Collection
+    public function getGroupeCompetences(): Collection
     {
-        return $this->competence;
+        return $this->groupeCompetences;
     }
 
-    public function addCompetence(Competence $competence): self
+    public function addGroupeCompetence(GroupeCompetence $groupeCompetence): self
     {
-        if (!$this->competence->contains($competence)) {
-            $this->competence[] = $competence;
+        if (!$this->groupeCompetences->contains($groupeCompetence)) {
+            $this->groupeCompetences[] = $groupeCompetence;
+            $groupeCompetence->addCompetence($this);
         }
 
         return $this;
     }
 
-    public function removeCompetence(Competence $competence): self
+    public function removeGroupeCompetence(GroupeCompetence $groupeCompetence): self
     {
-        if ($this->competence->contains($competence)) {
-            $this->competence->removeElement($competence);
+        if ($this->groupeCompetences->contains($groupeCompetence)) {
+            $this->groupeCompetences->removeElement($groupeCompetence);
+            $groupeCompetence->removeCompetence($this);
         }
 
         return $this;
     }
 
     /**
-     * @return Collection|Referentiel[]
+     * @return Collection|NiveauEvaluation[]
      */
-    public function getReferentiels(): Collection
+    public function getNiveauEvaluations(): Collection
     {
-        return $this->referentiels;
+        return $this->niveauEvaluations;
     }
 
-    public function addReferentiel(Referentiel $referentiel): self
+    public function addNiveauEvaluation(NiveauEvaluation $niveauEvaluation): self
     {
-        if (!$this->referentiels->contains($referentiel)) {
-            $this->referentiels[] = $referentiel;
-            $referentiel->addCompetence($this);
+        if (!$this->niveauEvaluations->contains($niveauEvaluation)) {
+            $this->niveauEvaluations[] = $niveauEvaluation;
+            $niveauEvaluation->setCompetence($this);
         }
 
         return $this;
     }
 
-    public function removeReferentiel(Referentiel $referentiel): self
+    public function removeNiveauEvaluation(NiveauEvaluation $niveauEvaluation): self
     {
-        if ($this->referentiels->contains($referentiel)) {
-               $this->referentiels->removeElement($referentiel);
-            $referentiel->removeCompetence($this);
+        if ($this->niveauEvaluations->contains($niveauEvaluation)) {
+            $this->niveauEvaluations->removeElement($niveauEvaluation);
+            // set the owning side to null (unless already changed)
+            if ($niveauEvaluation->getCompetence() === $this) {
+                $niveauEvaluation->setCompetence(null);
+            }
         }
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?User
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?User $createdBy): self
-    {
-        $this->createdBy = $createdBy;
 
         return $this;
     }
@@ -186,4 +172,5 @@ class GroupeCompetence
 
         return $this;
     }
+
 }
