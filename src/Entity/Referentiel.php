@@ -24,9 +24,15 @@ use Symfony\Component\Validator\Constraints as Assert;
     *     },
     *     
     *     itemOperations={
-    *         "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT')","security_message"="Vous n'etes pas autorisé à faire cette action de lister.","path"="admin/referentiels/{id}"}, 
-    *         "get_groupeCompetences"={"method"="get", "security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT')","security_message"="Vous n'etes pas autorisé à faire cette action de lister.","path"="admin/referentiels/{id}/groupe_competences/{num}"}, 
-    *         "put"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT'))","security_message"="Vous n'etes pas autorisé à faire cette action de modification.","path"="admin/referentiels/{id}"},
+    *         "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT')",
+    *           "security_message"="Vous n'etes pas autorisé à faire cette action de lister.",
+    *           "path"="admin/referentiels/{id}"}, 
+    *         "grpCompet_Ref"={"method"="get",
+    *            "security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT')",
+    *            "security_message"="Vous n'etes pas autorisé à faire cette action de lister.","path"="admin/referentiels/{id}/groupe_competences/{num}"}, 
+    *         "put"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT'))",
+    *            "security_message"="Vous n'etes pas autorisé à faire cette action de modification.",
+    *            "path"="admin/referentiels/{id}"},
     *     "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
     *              "security_message"="Seul l'admin a accès à cette ressource",
     *              "path"="/admin/referentiels/{id}/archivage"}
@@ -78,7 +84,7 @@ class Referentiel
     /**
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, inversedBy="referentiels")
      */
-    private $competences;
+    private $groupeCompetences;
 
     /**
      * @ORM\OneToMany(targetEntity=Promo::class, mappedBy="referentiel")
@@ -92,7 +98,7 @@ class Referentiel
 
     public function __construct()
     {
-        $this->competences = new ArrayCollection();
+        $this->groupeCompetences = new ArrayCollection();
         $this->promos = new ArrayCollection();
     }
 
@@ -164,28 +170,29 @@ class Referentiel
     /**
      * @return Collection|GroupeCompetence[]
      */
-    public function getCompetences(): Collection
+    public function getGroupeCompetences(): Collection
     {
-        return $this->competences;
+        return $this->groupeCompetences;
     }
-
-    public function addCompetence(GroupeCompetence $competence): self
+    
+    public function addGroupeCompetence(GroupeCompetence $groupeCompetence): self
     {
-        if (!$this->competences->contains($competence)) {
-            $this->competences[] = $competence;
+        if (!$this->groupeCompetences->contains($groupeCompetence)) {
+            $this->groupeCompetences[] = $groupeCompetence;
         }
 
         return $this;
     }
 
-    public function removeCompetence(GroupeCompetence $competence): self
+    public function removeGroupeCompetence(GroupeCompetence $groupeCompetence): self
     {
-        if ($this->competences->contains($competence)) {
-            $this->competences->removeElement($competence);
+        if ($this->groupeCompetences->contains($groupeCompetence)) {
+            $this->groupeCompetences->removeElement($groupeCompetence);
         }
 
         return $this;
     }
+
 
     /**
      * @return Collection|Promo[]

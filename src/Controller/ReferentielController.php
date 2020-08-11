@@ -3,12 +3,13 @@
 namespace App\Controller;
 
 use App\Repository\CompetenceRepository;
-use App\Repository\ReferentielRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ReferentielRepository;
+use App\Repository\GroupeCompetenceRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ReferentielController extends AbstractController
 {
@@ -17,9 +18,9 @@ class ReferentielController extends AbstractController
      * path="api/admin/referentiels/groupe_competences",
      * methods={"GET"},
      * defaults={
-     *  "__controller"="App\Controller\ReferentielsController::getGroupeCompetences",
+     *  "__controller"="App\Controller\ReferentielController::getGrpCompet_Ref",
      *          "__api_resource_class"=Referentiel::class,
-     *          "__api_collection_operation_name"="get_groupeCompetences"
+     *          "__api_collection_operation_name"="grpCompet_Ref"
      * }
      * )
      */
@@ -51,5 +52,25 @@ class ReferentielController extends AbstractController
 
 
     }
+
+    /**
+     * @Route(
+     * path="api/admin/referentiels/{id}/grpecompetences/{num}",
+     * methods={"GET"},
+     * defaults={
+     *  "__controller"="App\Controller\ReferentielController::getGroupeCompetences",
+     *          "__api_resource_class"=Referentiel::class,
+     *          "__api_collection_operation_name"="get_groupeCompetences"
+     * }
+     * )
+     */
+    public function getGrpCompet_Ref(ReferentielRepository $repoRef, GroupeCompetenceRepository $repoGrp, $id)
+    {
+        $ref = $repoRef->find($id);
+        $groupeCompetences=$ref->getIdCompetences();
+        dd($groupeCompetences);
+            return $this->json($groupeCompetences, Response::HTTP_OK);
+    }
+
 
 }

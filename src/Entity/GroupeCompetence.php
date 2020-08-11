@@ -53,7 +53,7 @@ class GroupeCompetence
     private $descriptif;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Referentiel::class, mappedBy="competences")
+     * @ORM\ManyToMany(targetEntity=Referentiel::class, mappedBy="groupeCompetences")
      */
     private $referentiels;
 

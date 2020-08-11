@@ -2,10 +2,19 @@
 
 namespace App\Controller;
 
+use DateTime;
 use App\Entity\Promo;
-use App\Repository\UserRepository;
+use App\Entity\Groupe;
+use App\Repository\ApprenantRepository;
+use App\Repository\FormateurRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ReferentielRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PromoController extends AbstractController
@@ -19,11 +28,52 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function savePromo()
-    {   
-        $tab=['SavePromo'];
-        dd($tab);
+    public function savePromo(FormateurRepository $repoFormator,ReferentielRepository $repoRef, ApprenantRepository $repoApp, Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
+    {
+        $promo=$request->getContent();
+        $tab_promo = $serializer->decode($promo,"json");
+        $new_promo= new Promo();
+          $new_promo->setLangue($tab_promo["langue"])
+                    ->setTitre($tab_promo["titre"])
+                    ->setLieu($tab_promo["lieu"])
+                    ->setReferenceAgate($tab_promo["referenceAgate"])
+                    ->setEtat($tab_promo["etat"])
+                    ->setDescription($tab_promo["description"])
+                    ->setDateDebut(new \DateTime($tab_promo["dateDebut"]))
+                    ->setDateFinProvisoire(new \DateTime($tab_promo["dateFinProvisoire"]));
+            $referentiel= $repoRef->findOneBy(['libelle' => $tab_promo['referentiel']]);
+            $new_promo->setReferentiel($referentiel);
 
+            //gestion du drp principal
+            $new_Grp_Principal= new Groupe();
+            $new_Grp_Principal->setNom($tab_promo['groupePrincipal']["nom"])
+                            ->setType($tab_promo['groupePrincipal']["type"])
+                            ->setStatut($tab_promo['groupePrincipal']["statut"])
+                            ->setNbreApprenant(count($tab_promo["apprenants"]))
+                            ->setDateCreation(new \DateTime($tab_promo['groupePrincipal']["dateCreation"]) );
+            $manager->persist($new_Grp_Principal);
+            foreach ($tab_promo["formateurs"] as $value) {
+                $formateur= $repoFormator->find($value);
+                $new_promo->addFormateur($formateur);
+                $new_Grp_Principal->addFormateur($formateur);
+            }
+            foreach ($tab_promo["apprenants"] as $value) {
+                $apprenant= $repoApp->find($value);
+                $new_promo->addApprenant($apprenant);
+                $new_Grp_Principal->addApprenant($apprenant);
+            }
+            $new_promo->addGroupe($new_Grp_Principal);
+
+            $user = $this->get('security.token_storage')->getToken()->getUser();
+            $new_promo -> setCreatedBy($user);
+            $errors = $validator->validate($new_promo);
+            if (count($errors)) {
+                $errors = $serializer->serialize($errors, "json");
+                return new JsonResponse($errors, Response::HTTP_BAD_REQUEST, [], true);
+            }
+            $manager->persist($new_promo);
+            $manager->flush();
+            return $this->json($new_promo,Response::HTTP_CREATED);
     }
 
 

@@ -2,18 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f60c7538-4697-478a-8d9b-ac2889059df2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/migrations/Version20200807181628.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/FormateurController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/FormateurController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/PromoController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/PromoController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/ReferentielController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/ReferentielController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/UserController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/UserController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Apprenant.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Apprenant.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Formateur.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Formateur.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Groupe.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Groupe.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entity/GroupeCompetence.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/GroupeCompetence.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/ProfilSortie.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/ProfilSortie.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Promo.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Promo.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entity/Referentiel.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Referentiel.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/User.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,7 +133,14 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -151,6 +152,9 @@
       <updated>1597082815215</updated>
       <workItem from="1597082817642" duration="351000" />
       <workItem from="1597083191153" duration="909000" />
+      <workItem from="1597099253002" duration="8127000" />
+      <workItem from="1597148632223" duration="371000" />
+      <workItem from="1597152838709" duration="325000" />
     </task>
     <servers />
   </component>
@@ -158,13 +162,29 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="729" y="311" width="524" height="491" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1597083659144">
+    <state x="729" y="311" width="871" height="491" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1597141995511">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
-    <state x="729" y="311" width="524" height="491" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597083659144" />
+    <state x="729" y="311" width="871" height="491" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597141995511" />
+    <state x="806" y="237" width="369" height="640" key="RollbackChangesDialog" timestamp="1597152958902">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="806" y="237" width="369" height="640" key="RollbackChangesDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597152958902" />
+    <state x="485" y="188" width="1022" height="737" key="SettingsEditor" timestamp="1597152915210">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="485" y="188" width="1022" height="737" key="SettingsEditor/72.27.1848.1053@72.27.1848.1053" timestamp="1597152915210" />
+    <state x="777" y="468" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1597142163077">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="777" y="468" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/72.27.1848.1053@72.27.1848.1053" timestamp="1597142163077" />
     <state x="645" y="269" width="700" height="530" key="recent.locations.popup" timestamp="1597083758746">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="645" y="269" width="700" height="530" key="recent.locations.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1597083758746" />
+    <state x="721" y="467" width="540" height="179" key="vcs.readOnlyHandler.ReadOnlyStatusDialog" timestamp="1597153146134">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="721" y="467" width="540" height="179" key="vcs.readOnlyHandler.ReadOnlyStatusDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597153146134" />
   </component>
 </project>

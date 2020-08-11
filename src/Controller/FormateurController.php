@@ -20,7 +20,7 @@ class FormateurController extends AbstractController
      *     methods={"POST"}
      * )
      */
-    public function addApprenant(Request $request, \Swift_Mailer $mailer, UserPasswordEncoderInterface $encoder, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
+    public function addAFormateur(Request $request, \Swift_Mailer $mailer, UserPasswordEncoderInterface $encoder, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
     {
         $apprenant = $request->request->all();
         $avatar = $request->files->get("avatar");
