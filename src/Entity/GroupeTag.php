@@ -27,13 +27,13 @@ class GroupeTag
     private $libelle;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="groupetags")
+     * @ORM\ManyToMany(targetEntity=Tag::class, mappedBy="groupeTags")
      */
-    private $tag;
+    private $tags;
 
     public function __construct()
     {
-        $this->tag = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -56,15 +56,16 @@ class GroupeTag
     /**
      * @return Collection|Tag[]
      */
-    public function getTag(): Collection
+    public function getTags(): Collection
     {
-        return $this->tag;
+        return $this->tags;
     }
 
     public function addTag(Tag $tag): self
     {
-        if (!$this->tag->contains($tag)) {
-            $this->tag[] = $tag;
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
+            $tag->addGroupeTag($this);
         }
 
         return $this;
@@ -72,10 +73,12 @@ class GroupeTag
 
     public function removeTag(Tag $tag): self
     {
-        if ($this->tag->contains($tag)) {
-            $this->tag->removeElement($tag);
+        if ($this->tags->contains($tag)) {
+            $this->tags->removeElement($tag);
+            $tag->removeGroupeTag($this);
         }
 
         return $this;
     }
+
 }

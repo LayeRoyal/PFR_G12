@@ -32,13 +32,14 @@ class Tag
     private $descriptif;
 
     /**
-     * @ORM\ManyToMany(targetEntity=GroupeTag::class, mappedBy="tag")
+     * @ORM\ManyToMany(targetEntity=GroupeTag::class, inversedBy="tags")
      */
-    private $groupetags;
+    private $groupeTags;
+
 
     public function __construct()
     {
-        $this->groupetags = new ArrayCollection();
+        $this->groupeTags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -75,26 +76,26 @@ class Tag
      */
     public function getGroupeTags(): Collection
     {
-        return $this->groupetags;
+        return $this->groupeTags;
     }
 
-    public function addGroupeTag(GroupeTag $groupetag): self
+    public function addGroupeTag(GroupeTag $groupeTag): self
     {
-        if (!$this->groupetags->contains($groupetag)) {
-            $this->groupetags[] = $groupetag;
-            $groupetag->addTag($this);
+        if (!$this->groupeTags->contains($groupeTag)) {
+            $this->groupeTags[] = $groupeTag;
         }
 
         return $this;
     }
 
-    public function removeGroupeTag(GroupeTag $groupetag): self
+    public function removeGroupeTag(GroupeTag $groupeTag): self
     {
-        if ($this->groupetags->contains($groupetag)) {
-            $this->groupetags->removeElement($groupetag);
-            $groupetag->removeTag($this);
+        if ($this->groupeTags->contains($groupeTag)) {
+            $this->groupeTags->removeElement($groupeTag);
         }
 
         return $this;
     }
+
+    
 }

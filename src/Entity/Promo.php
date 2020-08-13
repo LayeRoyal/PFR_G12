@@ -62,7 +62,7 @@ use Doctrine\ORM\Mapping as ORM;
     *            },
     *         "put"={"security_post_denormalize"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","security_message"="Seul un admin peut faire cette action.","path"="admin/promo/{id}",},
     *            "add_del_students_one_promo"={
-    *              "method"="PATCH",
+    *              "method"="PUT",
     *              "path"="/admin/promo/{id}/apprenants",          
     *              "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))",
     *              "security_message"="Vous n'avez pas access à cette Ressource"

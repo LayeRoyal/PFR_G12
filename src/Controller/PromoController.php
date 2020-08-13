@@ -5,6 +5,8 @@ namespace App\Controller;
 use DateTime;
 use App\Entity\Promo;
 use App\Entity\Groupe;
+use App\Repository\PromoRepository;
+use App\Repository\GroupeRepository;
 use App\Repository\ApprenantRepository;
 use App\Repository\FormateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,7 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PromoController extends AbstractController
@@ -146,10 +150,11 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getReferentielPromo()
+    public function getReferentielPromo(PromoRepository $repoPromo,$id)
     {
-        $tab=['Referentiel de la promo'];
-        dd($tab);
+       $promo= $repoPromo->find($id);
+        return $this->json($promo,Response::HTTP_OK);
+
 
     }
 
@@ -184,11 +189,11 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getStudentGrpPromo()
+    public function getStudentGrpPromo( GroupeRepository $repoGrp, $num)
     {
-        $tab=['tous les apprenants d\'un groupe de la promo'];
-        dd($tab);
-
+        $grp= $repoGrp->find($num);
+                $apprenants=$grp->getApprenants();
+        return $this->json($apprenants,Response::HTTP_OK);
     }
 
     /**
@@ -203,17 +208,22 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getFormateurPromo()
+    public function getFormateurPromo(PromoRepository $repoPromo,$id, NormalizerInterface $norm)
     {
-        $tab=['tous les formateurs de la promo'];
-        dd($tab);
-
+         $promo= $repoPromo->find($id);
+         $formateurs=$promo->getFormateurs();
+        dd($formateurs);
+         $norm= new ObjectNormalizer();
+        //  $formateurNormalises= $norm->normalize($formateurs,null,['groups'=>'promo_read']);
+        // return $this->formateurNormalises;
+         //$formateurNormalises=$norm->normalize($formateurs,null,['groups'=>'promo_read']);
+        return $this->json($formateurs,Response::HTTP_OK);
     }
 
     /**
     * @Route(
     *     path="api/admin/promo/{id}/apprenants",
-    *     methods={"PATCH"},
+    *     methods={"PUT"},
     *     defaults={
     *         "__controller"="\app\Controller\PromoController::patchApprenantPromo",
     *         "__api_resource_class"=Promo::class,
@@ -222,7 +232,7 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function patchApprenantPromo(Request $req,PromoRepository $repo, ApprenantRepository $apprenant)
+    public function putApprenantPromo(Request $req,PromoRepository $repo, ApprenantRepository $apprenant)
     {
         $promo=$repo->find($id);
         $student=$apprenant->find($req->request->get('apprenant'));
@@ -242,10 +252,21 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function putFormateurPromo()
+    public function putFormateurPromo($id,Request $req, SerializerInterface $serializer,PromoRepository $repo, FormateurRepository $formateur, EntityManagerInterface $manager)
     {
-        $tab=['ajout supp formateurs d\'une promo'];
-        dd($tab);
+        
+       $promo=$repo->find($id);
+       $formateurs=$req->getContent();
+       $tab_formateur = $serializer->decode($formateurs,"json");
+    //    dd($tab_formateur);
+    //    foreach ($formateurs as $value) {  
+    //    }
+        foreach ($tab_formateur['formateurs'] as $value) {
+            $form=$formateur->find($value);
+            $promo->addFormateur($form);
+        }
+        $manager->flush();
+        return $this->json($promo,Response::HTTP_OK);
 
     }
 
@@ -276,11 +297,10 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function detailPromo()
+    public function detailPromo( PromoRepository $repo,$id)
     {   
-        $tab=['DetailPromo'];
-        dd($tab);
-
+        $promo=$repo->find($id);
+        return $this->json($promo,Response::HTTP_OK);
     }
 
     /**
