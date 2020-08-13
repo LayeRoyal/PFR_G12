@@ -19,17 +19,6 @@ class ApprenantRepository extends ServiceEntityRepository
         parent::__construct($registry, Apprenant::class);
     }
 
-
-    public function findByProfil($value)
-    {
-        return $this->createQueryBuilder('u')
-            ->where('u.profil = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
     
     // /**
     //  * @return Apprenant[] Returns an array of Apprenant objects

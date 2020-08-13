@@ -44,12 +44,12 @@ class Competence
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $Libelle;
+    private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $Descriptif;
+    private $descriptif;
 
     /**
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, mappedBy="competence")
@@ -60,13 +60,17 @@ class Competence
     /**
      * @ORM\OneToMany(targetEntity=NiveauEvaluation::class, mappedBy="competence")
      */
-    private $niveau;
+    private $niveauEvaluations;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $archivage;
 
     public function __construct()
     {
         $this->groupeCompetences = new ArrayCollection();
         $this->niveauEvaluations = new ArrayCollection();
-        $this->niveau = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -76,24 +80,24 @@ class Competence
 
     public function getLibelle(): ?string
     {
-        return $this->Libelle;
+        return $this->libelle;
     }
 
-    public function setLibelle(string $Libelle): self
+    public function setLibelle(string $libelle): self
     {
-        $this->Libelle = $Libelle;
+        $this->libelle = $libelle;
 
         return $this;
     }
 
     public function getDescriptif(): ?string
     {
-        return $this->Descriptif;
+        return $this->descriptif;
     }
 
-    public function setDescriptif(string $Descriptif): self
+    public function setDescriptif(string $descriptif): self
     {
-        $this->Descriptif = $Descriptif;
+        $this->descriptif = $descriptif;
 
         return $this;
     }
@@ -153,6 +157,18 @@ class Competence
                 $niveauEvaluation->setCompetence(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getArchivage(): ?bool
+    {
+        return $this->archivage;
+    }
+
+    public function setArchivage(bool $archivage): self
+    {
+        $this->archivage = $archivage;
 
         return $this;
     }

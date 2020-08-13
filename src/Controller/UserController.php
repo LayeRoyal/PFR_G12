@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ class UserController extends AbstractController
 {
     /**
      * @Route(
-     *     path="/api/admin",
+     *     path="/api/admin/users",
      *     methods={"POST"}
      * )
      */
@@ -50,13 +51,15 @@ class UserController extends AbstractController
         //Envoi de l'Email de confirmation 
 
         $message = (new \Swift_Message('Orange Digital Center'))
-            ->setFrom('adelinomendes1995@gmail.com')
+            ->setFrom('abdoulaye.drame1@uvs.edu.sn')
             ->setTo($user->getEmail())
             ->setBody("mot de passe est $password , pour " . $username);
         $mailer->send($message);
 
-        return  new JsonResponse($user, Response::HTTP_CREATED);
+        return  $this->json($user, Response::HTTP_CREATED);
 
         fclose($avatar);
     }
+
+   
 }

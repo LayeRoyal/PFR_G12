@@ -2,37 +2,34 @@
 
 namespace App\Entity;
 
-
+use App\Entity\Competence;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\GroupeCompetenceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
  * attributes={"pagination_items_per_page"=3},
  * collectionOperations={
-    *         "post"={"security"="is_granted('ROLE_ADMIN')", 
-    *          "security_message"="Seul un admin peut faire cette action.",
-    *          "path"="/admin/groupecompetencesTeam1"},
-    *         "get"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM')) ",
-    *         "security_message"="Vous n'avez pas acces a cette ressource.",
-    *          "path"="/admin/groupecompetencesTeam1",
-    *         },
-    *     },
- *itemOperations={
-    *       "get"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))",
-    *       "security_message"="Seul l'admin, le formateur et le CM sont autorisés a cette ressource",
-    *       "path"="/admin/grpecompetences/{id}"},
-    *       "competencedungroupe"={"method"="get","security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))",
-    *       "security_message"="Seuls l'admin, le formateur et le CM sont autorisés a cette ressource",
-    *       "path"="/admin/grpecompetences/{id}/competences"}, 
-    *       "put"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))",
-    *       "security_message"="Seuls l'admin, le formateur et le CM sont autorisés a cette ressource",
-    *       "path"="/admin/grpecompetences/{id}"},  
-*}
-
+ *          "get"={"path"="/admin/grpecompetences"},
+ *          "post"={"security"="is_granted('ROLE_ADMIN') ",
+ *              "security_message"="Seul l'admin a accès à cette ressource",
+ *              "path"="/admin/grpecompetences"}
+ * },
+ * itemOperations={
+ *          "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM')",
+ *              "security_message"="Seul l'admin ou le formateur ou le CM a accès à cette ressource",
+ *              "path"="/admin/grpecompetences/{id}"},
+ *          "put"={"security"="is_granted('ROLE_ADMIN') ",
+ *              "security_message"="Seul l'admin a accès à cette ressource",
+ *              "path"="/admin/grpecompetences/{id}"},
+ *          "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
+ *              "security_message"="Seul l'admin a accès à cette ressource",
+ *              "path"="/admin/grpecompetences/{id}/archivage"}
+ * }
  * )
  * @ORM\Entity(repositoryClass=GroupeCompetenceRepository::class)
  */
@@ -51,17 +48,35 @@ class GroupeCompetence
     private $libelle;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text")
      */
     private $descriptif;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupeCompetences")
+     * @ORM\ManyToMany(targetEntity=Referentiel::class, mappedBy="groupeCompetences")
+     */
+    private $referentiels;
+
+     /**
+     * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupecompetences", cascade={"persist"})
      */
     private $competence;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="groupeCompetences")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $archivage;
+
     public function __construct()
     {
+        $this->referentiels = new ArrayCollection();
         $this->competence = new ArrayCollection();
     }
 
@@ -94,7 +109,7 @@ class GroupeCompetence
         return $this;
     }
 
-    /**
+     /**
      * @return Collection|Competence[]
      */
     public function getCompetence(): Collection
@@ -116,6 +131,58 @@ class GroupeCompetence
         if ($this->competence->contains($competence)) {
             $this->competence->removeElement($competence);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Referentiel[]
+     */
+    public function getReferentiels(): Collection
+    {
+        return $this->referentiels;
+    }
+
+    public function addReferentiel(Referentiel $referentiel): self
+    {
+        if (!$this->referentiels->contains($referentiel)) {
+            $this->referentiels[] = $referentiel;
+            $referentiel->addCompetence($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReferentiel(Referentiel $referentiel): self
+    {
+        if ($this->referentiels->contains($referentiel)) {
+               $this->referentiels->removeElement($referentiel);
+            $referentiel->removeCompetence($this);
+        }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getArchivage(): ?bool
+    {
+        return $this->archivage;
+    }
+
+    public function setArchivage(bool $archivage): self
+    {
+        $this->archivage = $archivage;
 
         return $this;
     }

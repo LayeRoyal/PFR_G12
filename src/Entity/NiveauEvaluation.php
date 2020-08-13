@@ -37,7 +37,7 @@ class NiveauEvaluation
     private $groupe_action;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Competence::class, inversedBy="niveau")
+     * @ORM\ManyToOne(targetEntity=Competence::class, inversedBy="niveau",cascade={"persist"})
      */
     private $competence;
 

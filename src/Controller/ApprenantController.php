@@ -2,13 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Repository\ProfilRepository;
 use App\Repository\ApprenantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,13 +25,14 @@ class ApprenantController extends AbstractController
      */
     public function addApprenant(Request $request, \Swift_Mailer $mailer, UserPasswordEncoderInterface $encoder, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
     {
-        $user = $request->request->all();
+        $apprenant = $request->request->all();
         $avatar = $request->files->get("avatar");
+        $genre=$apprenant['genre'];
         $avatar = fopen($avatar->getRealPath(), "rb");
-        $user["avatar"] = $avatar;
-        $username = $user['username'];
-        $user = $serializer->denormalize($user, "App\Entity\Apprenant");
-        $errors = $validator->validate($user);
+        $apprenant["avatar"] = $avatar;
+        $username = $apprenant['username'];
+        $apprenant = $serializer->denormalize($apprenant, "App\Entity\Apprenant");
+        $errors = $validator->validate($apprenant);
         if (count($errors)) {
             $errors = $serializer->serialize($errors, "json");
             return new JsonResponse($errors, Response::HTTP_BAD_REQUEST, [], true);
@@ -46,37 +48,20 @@ class ApprenantController extends AbstractController
             return $randomString;
         }
         $password = randomPassword();
-        $user->setPassword($encoder->encodePassword($user, $password));
-        $manager->persist($user);
+        $apprenant->setPassword($encoder->encodePassword($apprenant, $password))
+             ->setGenre($genre);
+        $manager->persist($apprenant);
         $manager->flush();
         //Envoi de l'Email de confirmation 
 
         $message = (new \Swift_Message('Orange Digital Center'))
             ->setFrom('abdoulaye.drame1@uvs.edu.sn')
-            ->setTo($user->getEmail())
+            ->setTo($apprenant->getEmail())
             ->setBody("mot de passe est $password , pour " . $username);
         $mailer->send($message);
 
-        return  new JsonResponse($user, Response::HTTP_CREATED);
-
+        return  $this->json($apprenant, Response::HTTP_CREATED);
         fclose($avatar);
     }
 
-    /**
-     * @Route(
-     *     path="api/apprenants",
-     *     methods={"GET"},
-     * )
-     */
-    public function getApprenant(ApprenantRepository $repo, SerializerInterface $serializer)
-    {
-        $apprenant = $repo->findAll();
-        dd($apprenant);
-        foreach ($apprenant as $key => $value) {
-            $avat = $value->getAvatar();
-            $avatar = stream_get_meta_data($avat);
-            $value->setAvatar($avatar);
-        }
-        return $this->json($apprenant, Response::HTTP_OK,);
-    }
 }

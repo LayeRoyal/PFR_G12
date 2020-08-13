@@ -1,0 +1,39 @@
+
+                POUR PROMO
+
+RANGBA JERRY
+
+GET    /admin/promo/principal/
+
+GET   /admin/promo/id/principal/
+
+PUT   /admin/promo/id/groupes/id
+
+GET   /admin/referentiels/id/grpecompetences/id
+
+
+ADELINO MENDES
+
+GROUPE_TAG
+TAG 
+
+
+AISSATOU CISSE
+
+GET  /admin/promo/apprenants/attente
+
+GET  /admin/promo/id/apprenants/attente
+
+PUT  /admin/promo/id/apprenants
+
+
+ABDOULAYE DRAME
+
+GET  /admin/promo/id/referentiels
+
+GET   /admin/promo/id/groupes/id/apprenants
+
+GET   /admin/promo/id/formateurs
+
+PUT   /admin/promo/id/formateurs
+
