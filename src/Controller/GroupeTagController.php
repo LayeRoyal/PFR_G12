@@ -17,11 +17,11 @@ class GroupeTagController extends AbstractController
 {
      /**
     * @Route(
-    *     path="api/groupe_tags",
+    *     path="api/admin/grptags,
     *     methods={"POST"}
     * )
     */
-    public function createGrpTag(TagRepository $repo, Request $req , SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
+    public function createGrpTag(TagRepository $repo, Request $req , SerializerInterface $serializer, EntityManagerInterface $manager)
     {
          $grpTag=$req->getContent();
         $tab_grpTag = $serializer->decode($grpTag,"json");
@@ -40,23 +40,39 @@ class GroupeTagController extends AbstractController
 
      /**
     * @Route(
-    *     path="api/groupe_tags/{id}",
-    *     methods={"PUT"}
+    *     path="api/admin/grptags/{id}/tags,
+    *     methods={"GET"},
+    *     defaults={
+    *         "__controller"="\app\Controller\GroupeTagController::putTag",
+    *         "__api_resource_class"=GroupeTag::class,
+    *         "__api_collection_operation_name"="getTags"
+    *     }
     * )
     */
-    public function putGrpTag($id, GroupeTagRepository $grpRepo ,TagRepository $repo, Request $req , SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $manager)
-    {
-         $grpTag=$req->getContent();
-        $tab_grpTag = $serializer->decode($grpTag,"json");
 
-        $newGrpTag=$grpRepo->find($id);
-        foreach ($tab_grpTag['tags'] as $key => $value) {
-            $tag=$repo->findOneBy(['libelle'=>$value]);
-            $newGrpTag->addTag($tag);
+    public function putTag(TagRepository $repo, GroupeTagRepository $reposit, $id, Request $request, SerializerInterface $serializer, EntityManagerInterface $manager )
+    {
+        $grpe_tag=$reposit->find($id);
+        if(!$grpe_tag)
+        {
+            return $this ->json(["message" => "Groupe tag not found"], Response::HTTP_NOT_FOUND);
         }
-        $manager->persist($newGrpTag);
-        $manager->flush();
-        return $this->json($newGrpTag,Response::HTTP_CREATED);
+       //supprimer ts les Tags pour ajouter ce qu'on veut
+        $tags=$grpe_tag->getTags();
+         foreach ($tags as $value) {
+            $grpe_tag->removeTag($value);
+         }
+       
+       $tags=$request->getContent();
+       $tab_tags = $serializer->decode($tags,"json");
+
+       foreach ($tab_tags['tags'] as $value) {
+        $tag=$repo->findOneBy(['libelle'=>$value]);
+        $grpe_tag->addTag($tag);
+    }
+     $manager->persist($grpe_tag);
+    $manager->flush();
+    return $this->json($grpe_tag,Response::HTTP_OK);
 
     }
 }

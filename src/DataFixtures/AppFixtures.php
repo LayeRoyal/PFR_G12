@@ -47,12 +47,13 @@ class AppFixtures extends Fixture
                  ->setNom($faker->lastName)
                  ->setEmail($faker->safeEmail)
                  ->setAvatar($faker->imageUrl(640,480,'cats'))
-                 ->setStatut("on")
+                 ->setStatut("Actif")
                  ->setProfil($profil)
                  ->setUsername(strtolower($profils[$i].($j+1)))
                  ->setPassword($this->encoder->encodePassword($user, "password".($j+1)));
                  if($profils[$i]=='APPRENANT'){
-                    $user->setGenre($faker->randomElement(['F','M']));
+                    $user->setGenre($faker->randomElement(['F','M']))
+                         ->setStatut($faker->randomElement(['Actif','Attente','Renvoyé']));
                 }
             $manager->persist($user);
         }

@@ -9,7 +9,27 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *   attributes={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","pagination_items_per_page"=3},
+ *   collectionOperations={
+ *          "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                 "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                  "path"="/admin/tags"},
+ *          "post"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                 "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                 "path"="/admin/tags"}
+ *   },
+ * 
+ *   itemOperations={
+ *          "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                  "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                  "path"="/admin/tags/{id}"
+ *             },
+ *          "put"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                 "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                 "path"="/admin/tags/{id}"
+ *             }        
+ * } )
  * @ORM\Entity(repositoryClass=TagRepository::class)
  */
 class Tag

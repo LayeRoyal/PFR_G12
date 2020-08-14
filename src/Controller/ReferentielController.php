@@ -8,6 +8,7 @@ use App\Repository\ReferentielRepository;
 use App\Repository\GroupeCompetenceRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -64,11 +65,24 @@ class ReferentielController extends AbstractController
      * }
      * )
      */
-    public function getGrpCompet_Ref(ReferentielRepository $repoRef, GroupeCompetenceRepository $repoGrp, $id)
+        public function getGrpCompet_Ref(ReferentielRepository $repoRef, GroupeCompetenceRepository $repoGrp, SerializerInterface $serializer, $id, $num)
     {
+        $groupeCompetences = $repoGrp->find($num);
         $ref = $repoRef->find($id);
-        $groupeCompetences=$ref->getIdCompetences();
-        dd($groupeCompetences);
+            if(!$ref){
+                return $this->json(['message'=>'Ce referentiel n\'existe pas.'], Response::HTTP_NOT_FOUND);
+            }
+        $grpRef=$ref->getGroupeCompetences();
+            $check = false;
+            foreach($grpRef as $value){
+                if($value ->getId()==$num){
+                    $check=true;
+                break;
+                }
+            }
+            if($check==false){
+                return $this->json(['message'=>'Ce groupe de compétence n\'existe pas dans ce referentiels'], Response::HTTP_NOT_FOUND);
+            }
             return $this->json($groupeCompetences, Response::HTTP_OK);
     }
 

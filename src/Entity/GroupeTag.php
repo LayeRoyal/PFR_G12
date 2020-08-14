@@ -9,7 +9,29 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
+ *  @ApiResource(
+ *    attributes={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","pagination_items_per_page"=3},
+ *    collectionOperations={
+ *          "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                 "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                  "path"="/admin/grptags"},
+ *          "post"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                 "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                 "path"="/admin/grptags"}
+ *    },
+ *    itemOperations={
+ *          "get"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')", "method"="get",
+ *                 "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                 "path"="/admin/grptags/{id}"
+ *              },
+ *          "getTags"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                     "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                     "path"="/admin/grptags/{id}/tags"
+ *              },
+ *          "PUT"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                   "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
+ *                 "path"="/admin/grptags/{id}"}
+ *     } )
  * @ORM\Entity(repositoryClass=GroupeTagRepository::class)
  */
 class GroupeTag

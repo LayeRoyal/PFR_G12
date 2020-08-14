@@ -88,16 +88,16 @@ class PromoController extends AbstractController
     *     defaults={
     *         "__controller"="\app\Controller\PromoController::getPromoPrincipal",
     *         "__api_resource_class"=Promo::class,
-    *         "__api_collection_operation_name"="detail_grp_principal"
+    *         "__api_collection_operation_name"="list_grp_principal"
     *     }
     * )
     */
 
-    public function getPromoPrincipal()
-    {
-        $tab=['PromoPrincipal'];
-        dd($tab);  
-    }
+      public function getPromoPrincipal(GroupeRepository $repo)
+        {
+            $promoPrincipal=$repo->findBy(["type"=>"Principal"]);
+                return $this->json($promoPrincipal, Response::HTTP_OK); 
+        }
 
 
  /**
@@ -112,12 +112,13 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getAllApprenantAttente()
+     public function getAllApprenantAttente(ApprenantRepository $apprenants)
     {
-        $tab=['tous les apprenants en attente'];
-        dd($tab);
+        $apprenantsEnAttente = $apprenants->findBy(['statut'=>'Attente']);
+        return $this->json($apprenantsEnAttente,Response::HTTP_OK);
 
     }
+
 
     /**
     * @Route(
@@ -131,12 +132,12 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getOneGrpPrincipal()
-    {
-        $tab=['tous les apprenants grp principal'];
-        dd($tab);
+     public function getOneGrpPrincipal(GroupeRepository $repo,$id)
+        {        
+            $detailGroupePrincipal=$repo->findBy(["type"=>"Principal", "promo"=>$id]);
+                return $this->json($detailGroupePrincipal, Response::HTTP_OK);
 
-    }
+        }
 
     /**
     * @Route(
@@ -150,12 +151,10 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getReferentielPromo(PromoRepository $repoPromo,$id)
+    public function getReferentielPromo(PromoRepository $repoRef,$id)
     {
-       $promo= $repoPromo->find($id);
-        return $this->json($promo,Response::HTTP_OK);
-
-
+       $ref= $repoRef->find($id)->getReferentiel();
+        return $this->json($ref,Response::HTTP_OK);
     }
 
     /**
@@ -170,10 +169,10 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getApprenantAttentePromo()
+     public function getApprenantAttentePromo(ApprenantRepository $apprenant, $id)
     {
-        $tab=['les apprenants en attente d\'une promo'];
-        dd($tab);
+       $apprenantEnAttente = $apprenant->findBy(['promo'=>$id, 'statut'=>'Attente' ]);
+       return $this->json($apprenantEnAttente,Response::HTTP_OK);
 
     }
 
@@ -189,13 +188,33 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getStudentGrpPromo( GroupeRepository $repoGrp, $num)
+    public function getStudentGrpPromo( PromoRepository $repoPromo, GroupeRepository $repoGrp, $id, $num)
     {
-        $grp= $repoGrp->find($num);
-                $apprenants=$grp->getApprenants();
+        $promo = $repoPromo->find($id);
+         if(!$promo)
+        {
+            return $this ->json(["message" => "Promo not found"], Response::HTTP_NOT_FOUND);
+        }
+        
+        $grpPromo=$promo->getGroupes();
+        $check=false;
+        foreach ($grpPromo as $value) {
+            if($value->getId()==$num)
+            {
+                $check=true;
+            break;
+            }
+        }
+        if($check==false)
+        {
+            return $this ->json(["message" => "Group not found in this promo"], Response::HTTP_NOT_FOUND);
+        }
+        $grp= $repoPromo->find($num);
+        $apprenants=$grp->getApprenants();
         return $this->json($apprenants,Response::HTTP_OK);
     }
-
+ 
+ 
     /**
     * @Route(
     *     path="api/admin/promo/{id}/formateurs",
@@ -208,15 +227,14 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function getFormateurPromo(PromoRepository $repoPromo,$id, NormalizerInterface $norm)
+    public function getFormateurPromo(PromoRepository $repoPromo,$id, EntityManagerInterface $manager)
     {
          $promo= $repoPromo->find($id);
+             if(!$promo)
+            {
+                return $this ->json(["message" => "Promo not found"], Response::HTTP_NOT_FOUND);
+            }
          $formateurs=$promo->getFormateurs();
-        dd($formateurs);
-         $norm= new ObjectNormalizer();
-        //  $formateurNormalises= $norm->normalize($formateurs,null,['groups'=>'promo_read']);
-        // return $this->formateurNormalises;
-         //$formateurNormalises=$norm->normalize($formateurs,null,['groups'=>'promo_read']);
         return $this->json($formateurs,Response::HTTP_OK);
     }
 
@@ -225,19 +243,38 @@ class PromoController extends AbstractController
     *     path="api/admin/promo/{id}/apprenants",
     *     methods={"PUT"},
     *     defaults={
-    *         "__controller"="\app\Controller\PromoController::patchApprenantPromo",
+    *         "__controller"="\app\Controller\PromoController::putApprenantPromo",
     *         "__api_resource_class"=Promo::class,
     *         "__api_collection_operation_name"="add_del_students_one_promo"
     *     }
     * )
     */  
 
-    public function putApprenantPromo(Request $req,PromoRepository $repo, ApprenantRepository $apprenant)
+     public function putApprenantPromo($id,Request $req, SerializerInterface $serializer,PromoRepository $repo, ApprenantRepository $appr, EntityManagerInterface $manager)
     {
-        $promo=$repo->find($id);
-        $student=$apprenant->find($req->request->get('apprenant'));
-        $promo->addApprenant($student);
-        
+       $promo=$repo->find($id);
+        if(!$promo)
+        {
+            return $this ->json(["message" => "Promo not found"], Response::HTTP_NOT_FOUND);
+        }
+       //supprimer ts les apprenants pour ajouter ce qu'on veut
+        $apprenant=$promo->getApprenants();
+         foreach ($apprenant as $value) {
+            $promo->removeApprenant($value);
+         }
+       
+       $apprenants=$req->getContent();
+       $tab_apprenant = $serializer->decode($apprenants,"json");
+    
+        foreach ($tab_apprenant['apprenants'] as $value) {
+            $form=$appr->find($value);
+            $form->setPromo($promo);
+         $manager->persist($form);
+        }
+         $manager->persist($promo);
+        $manager->flush();
+        return $this->json($promo,Response::HTTP_OK);
+
     }
 
     /**
@@ -254,17 +291,25 @@ class PromoController extends AbstractController
 
     public function putFormateurPromo($id,Request $req, SerializerInterface $serializer,PromoRepository $repo, FormateurRepository $formateur, EntityManagerInterface $manager)
     {
-        
        $promo=$repo->find($id);
+        if(!$promo)
+        {
+            return $this ->json(["message" => "Promo not found"], Response::HTTP_NOT_FOUND);
+        }
+       //supprimer ts les formateurs pour ajouter ce qu'on veut
+        $formateurs=$promo->getFormateurs();
+         foreach ($formateurs as $value) {
+            $promo->removeFormateur($value);
+         }
+       
        $formateurs=$req->getContent();
        $tab_formateur = $serializer->decode($formateurs,"json");
-    //    dd($tab_formateur);
-    //    foreach ($formateurs as $value) {  
-    //    }
+    
         foreach ($tab_formateur['formateurs'] as $value) {
             $form=$formateur->find($value);
             $promo->addFormateur($form);
         }
+         $manager->persist($promo);
         $manager->flush();
         return $this->json($promo,Response::HTTP_OK);
 
@@ -282,11 +327,37 @@ class PromoController extends AbstractController
     * )
     */  
 
-    public function putPromoGrpStatus()
+    
+    public function putPromoGrpStatus(PromoRepository $repo, GroupeRepository $reposi, EntityManagerInterface $manager, Request $request, SerializerInterface $serializer,$id,$num)
     {
-        $tab=['Modifier statut d\'un groupe'];
-        dd($tab);
+        $promo=$repo->find($id);
+        if(!$promo)
+        {
+            return $this ->json(["message" => "Promo not found"], Response::HTTP_NOT_FOUND);
+        }
+        $grpPromo=$promo->getGroupes();
+        $check=false;
+        foreach ($grpPromo as $value) {
+            if($value->getId()==$num)
+            {
+                $check=true;
+            break;
+            }
+        }
+        if($check==false)
+        {
+            return $this ->json(["message" => "Group not found in this promo"], Response::HTTP_NOT_FOUND);
+        }
+        //apres verification on change le statut
+        $groupe=$reposi->find($num);
 
+        $groupe=$request->getContent();
+        $tab_groupe = $serializer->decode($groupe,"json");
+
+        $groupe->setStatut($tab_groupe['statut']);
+        $manager->persist($groupe);
+        $manager->flush();
+            return $this->json($groupe, Response::HTTP_OK);
     }
 
 
@@ -303,23 +374,5 @@ class PromoController extends AbstractController
         return $this->json($promo,Response::HTTP_OK);
     }
 
-    /**
-    * @Route(
-    *     path="api/admin/promo/{id}",
-    *     methods={"PUT"}
-    * )
-    */  
-
-    public function putPromo()
-    {   
-        $tab=['ModifyPromo'];
-        dd($tab);
-
-    }
-
-
-
-
-
-
+  
 }

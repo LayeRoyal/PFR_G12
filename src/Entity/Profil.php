@@ -24,7 +24,6 @@ use Symfony\Component\Validator\Constraints as Assert;
     *     itemOperations={
     *         "get"={"security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/profils/{id}", "normalization_context"={"groups"={"profil_detail_read"}}}, 
     *         "delete"={"security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
-    *         "patch"={"security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
     *         "put"={"security_message"="Seul un admin peut faire cette action.","path"="admin/profils/{id}",},
     *  }
   * )

@@ -384,11 +384,9 @@ class Promo
     public function removeApprenant(Apprenant $apprenant): self
     {
         if ($this->apprenants->contains($apprenant)) {
-            $this->apprenants->removeElement($apprenant);
             // set the owning side to null (unless already changed)
-            if ($apprenant->getPromo() === $this) {
                 $apprenant->setPromo(null);
-            }
+            
         }
 
         return $this;

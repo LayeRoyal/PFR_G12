@@ -14,13 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
    *     attributes={"pagination_items_per_page"=10},
     *     collectionOperations={
     *         "post"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))", "security_message"="Seul un admin peut faire cette action.","path"="admin/groupes"},
-    *         "get"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')) ", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/groupes"},
-    *         "get_all_grp_students"={
-    *           "method"="GET",
-    *           "path"="admin/groupes/apprenants" ,
-    *           "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))",
-    *           "security_message"="Vous n'avez pas access à cette Ressource"
-    *          }
+    *         "get"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')) ", "security_message"="Vous n'avez pas acces a cette ressource.","path"="admin/groupes"}
     *     },
     *     
     *     itemOperations={
@@ -31,10 +25,10 @@ use Doctrine\ORM\Mapping as ORM;
     *           "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))",
     *           "security_message"="Vous n'avez pas access à cette Ressource"
     *          },
-    *         "put"={"security_post_denormalize"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","security_message"="Seul un admin peut faire cette action.","path"="admin/groupes/{id}"},
+    *         "put"={"security_post_denormalize"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","security_message"="Seul un admin peut faire cette action.","path"="admin/groupes/{id}/apprenants"},
     *         "delete"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))","security_message"="Seul un admin peut faire cette action.","path"="admin/groupes/{id}"},
     *         "del_grp_student"={
-    *           "method"="GET",
+    *           "method"="DELETE",
     *           "path"="admin/groupes/{id}/apprenants/{num}" ,
     *           "security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))",
     *           "security_message"="Vous n'avez pas access à cette Ressource"

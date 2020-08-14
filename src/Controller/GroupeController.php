@@ -2,39 +2,17 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Repository\GroupeRepository;
+use App\Repository\ApprenantRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class GroupeController extends AbstractController
 {
-    /**
-    * @Route(
-    *     path="api/admin/groupes",
-    *     methods={"GET"}
-    * )
-    */  
-
-    public function listgroup()
-    {   
-        $tab=['List Groupes'];
-        dd($tab);
-
-    }
-
-      /**
-    * @Route(
-    *     path="api/admin/groupes",
-    *     methods={"POST"}
-    * )
-    */  
-
-    public function savegroupes()
-    {   
-        $tab=['Save Groupe'];
-        dd($tab);
-
-    }
-
     /**
     * @Route(
     *     path="api/admin/groupes/apprenants",
@@ -47,11 +25,10 @@ class GroupeController extends AbstractController
     * )
     */  
 
-    public function getApprenantAllGroup()
+    public function getApprenantAllGroup(ApprenantRepository $repo)
     {
-        $tab=['les apprenants de tous les groupes'];
-        dd($tab);
-
+        $apprenants=$repo->findAll();
+        return $this->json($apprenants,Response::HTTP_OK);
     }
 
     /**
@@ -66,11 +43,15 @@ class GroupeController extends AbstractController
     * )
     */  
 
-    public function getApprenantGroup()
+    public function getApprenantGroup($id, GroupeRepository $repo)
     {
-        $tab=['les apprenants d\'un groupe'];
-        dd($tab);
-
+        $grp=$repo->find($id);
+       if(!$grp)
+        {
+            return $this ->json(["message" => "Group not found"], Response::HTTP_NOT_FOUND);
+        }
+        $appr=$grp->getApprenants();
+        return $this->json($appr,Response::HTTP_OK);
     }
 
     /**
@@ -85,53 +66,56 @@ class GroupeController extends AbstractController
     * )
     */  
 
-    public function delApprenantGroup()
+    public function delApprenantGroup(GroupeRepository $repo, $id, $num, EntityManagerInterface $manager)
     {
-        $tab=['Supprimer un apprenant d\'un groupe'];
-        dd($tab);
-
-    }
-
-      /**
-    * @Route(
-    *     path="api/admin/groupes/{id}",
-    *     methods={"GET"}
-    * )
-    */  
-
-    public function detailgroup()
-    {   
-        $tab=['Detail Groupe'];
-        dd($tab);
-
+      $grp=$repo->find($id);
+       if(!$grp)
+        {
+            return $this ->json(["message" => "Group not found"], Response::HTTP_NOT_FOUND);
+        }
+       //supprimer un apprenant d'un grp
+        $appr=$grp->getApprenants();
+         foreach ($appr as $value) {
+             if($value->getId()==$num)
+             {
+                $grp->removeApprenant($value);
+                $manager->persist($grp);
+                $manager->flush();
+                return $this->json($grp,Response::HTTP_OK);
+             }
+            
+         }
+       
+        return $this ->json(["message" => "Apprenant not found in this group"], Response::HTTP_NOT_FOUND);
     }
 
     /**
     * @Route(
-    *     path="api/admin/groupes/{id}",
+    *     path="api/admin/groupes/{id}/apprenants",
     *     methods={"PUT"}
     * )
     */  
 
-    public function putgroup()
-    {   
-        $tab=['Modify Group'];
-        dd($tab);
+    public function addApprenantGroup($id,ApprenantRepository $repoApp, GroupeRepository $repo, Request $request,SerializerInterface $serializer, EntityManagerInterface $manager)
+    {
+        $grp=$repo->find($id);
+       if(!$grp)
+        {
+            return $this ->json(["message" => "Group not found"], Response::HTTP_NOT_FOUND);
+        }
 
-    }
+        $app=$request->getContent();
+        $tab_app = $serializer->decode($app,"json");
+        $apprenant= $repoApp->find($tab_app['apprenant']);
+        if(!$apprenant)
+        {
+            return $this ->json(["message" => "Apprenant not found"], Response::HTTP_NOT_FOUND);
+        }
+        $grp->addApprenant($apprenant);
+                $manager->persist($grp);
+                $manager->flush();
 
-     /**
-    * @Route(
-    *     path="api/admin/groupes/{id}",
-    *     methods={"DELETE"}
-    * )
-    */  
-
-    public function delgroup()
-    {   
-        $tab=['Delete Group'];
-        dd($tab);
-
-    }
+        return $this->json($grp,Response::HTTP_OK);
+    }  
 
 }
