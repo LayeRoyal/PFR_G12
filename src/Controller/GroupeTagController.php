@@ -17,7 +17,7 @@ class GroupeTagController extends AbstractController
 {
      /**
     * @Route(
-    *     path="api/admin/grptags,
+    *     path="api/admin/grptags",
     *     methods={"POST"}
     * )
     */
@@ -40,7 +40,7 @@ class GroupeTagController extends AbstractController
 
      /**
     * @Route(
-    *     path="api/admin/grptags/{id}/tags,
+    *     path="api/admin/grptags/{id}/tags",
     *     methods={"GET"},
     *     defaults={
     *         "__controller"="\app\Controller\GroupeTagController::putTag",

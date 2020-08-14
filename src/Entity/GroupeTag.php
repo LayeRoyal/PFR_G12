@@ -25,6 +25,7 @@ use Doctrine\ORM\Mapping as ORM;
  *                 "path"="/admin/grptags/{id}"
  *              },
  *          "getTags"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR')",
+ *                      "method"="GET",
  *                     "security_message"="Accès non autorisé si vous êtes ni admin ni formateur ",
  *                     "path"="/admin/grptags/{id}/tags"
  *              },
