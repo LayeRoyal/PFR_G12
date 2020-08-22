@@ -16,31 +16,35 @@ use Doctrine\ORM\Mapping as ORM;
  *  collectionOperations={
  *     "GET"={
  *              "security_message"="Vous n'avez pas accès à la liste des profils de sortie",
- *              "path"="admin/profils_sortie"
+ *              "path"="admin/profilsorties"
  *           },
  *     
  *  
  *      "POST"={
  *              "security_message"="Vous n'êtes pas autorisé à créer un profil de sortie",
- *              "path"="admin/profils_sortie"
+ *              "path"="admin/profilsorties"
  *          }
  *   },
  *   itemOperations={
  *      
  *      "GET"={
  *              "security_message"="Vous n'avez pas accès à la liste des profil de sortie",
- *              "path"="admin/profils_sortie/{id}"
+ *              "path"="admin/profilsorties/{id}"
  *             },
+ *      "list_aprenant_promo_profilsorties"={
+ *              "method"="GET",
+ *              "security_message"="Vous n'avez pas accès à la liste des apprenants par profil de sortie",
+ *              "path"="admin/promo/id/profilsorties"
+ *              },
  * 
  *      "PUT"={
  *              "security_message"="Vous n'êtes pas autorisé à modifier un profil de sortie",
- *              "path"="admin/profils_sortie/{id}"
+ *              "path"="admin/profilsorties/{id}"
  *             },
  * 
- *     "DELETE"={
- *              "security_message"="Vous n'êtes pas autorisé à supprimer un profil de sortie",
- *              "path"="admin/profils_sortie/{id}"
- *              }
+    *     "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
+    *              "security_message"="Seul l'admin a accès à cette ressource",
+    *              "path"="/admin/profilsortie/{id}/archivage"}
  *      }
  * )
  * @ORM\Entity(repositoryClass=ProfilSortieRepository::class)
@@ -68,6 +72,11 @@ class ProfilSortie
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="profilSorties")
      */
     private $createdBy;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $archivage;
 
     public function __construct()
     {
@@ -130,6 +139,18 @@ class ProfilSortie
     public function setCreatedBy(?User $createdBy): self
     {
         $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getArchivage(): ?bool
+    {
+        return $this->archivage;
+    }
+
+    public function setArchivage(bool $archivage): self
+    {
+        $this->archivage = $archivage;
 
         return $this;
     }
