@@ -33,7 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     *         "put"={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM') or is_granted('ROLE_APPRENANT'))",
     *            "security_message"="Vous n'etes pas autorisé à faire cette action de modification.",
     *            "path"="admin/referentiels/{id}"},
-    *     "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
+    *         "archivage"={"method"="put","security"="is_granted('ROLE_ADMIN') ",
     *              "security_message"="Seul l'admin a accès à cette ressource",
     *              "path"="/admin/referentiels/{id}/archivage"}
     *  }

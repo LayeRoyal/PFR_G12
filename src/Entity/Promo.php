@@ -2,15 +2,17 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\PromoRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PromoRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PromoRepository::class)
  *  @ApiResource(
+    *     normalizationContext ={"groups"={"promo_read:read","user_read"}},
     *     collectionOperations={
     *         "post"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR'))", "security_message"="Action non authorisée.","path"="/admin/promo"},
     *         "get"={"security"="(is_granted('ROLE_ADMIN') or is_granted('ROLE_FORMATEUR') or is_granted('ROLE_CM'))", "security_message"="Vous n'avez pas acces a cette ressource.","path"="/admin/promo"},
@@ -88,6 +90,9 @@ class Promo
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"promo_read", "user_read"})
+     * 
+     * 
      */
     private $id;
 
@@ -97,11 +102,13 @@ class Promo
     private $langue;
 
     /**
+     * @Groups({"promo_read", "user_read"})
      * @ORM\Column(type="string", length=255)
      */
     private $titre;
 
     /**
+     * @Groups({"promo_read", "user_read"})
      * @ORM\Column(type="string", length=255)
      */
     private $description;
@@ -162,11 +169,17 @@ class Promo
      */
     private $apprenants;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Chat::class, mappedBy="promo")
+     */
+    private $chats;
+
     public function __construct()
     {
         $this->groupes = new ArrayCollection();
         $this->formateurs = new ArrayCollection();
         $this->apprenants = new ArrayCollection();
+        $this->chats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -391,4 +404,36 @@ class Promo
 
         return $this;
     }
+
+    /**
+     * @return Collection|Chat[]
+     */
+    public function getChats(): Collection
+    {
+        return $this->chats;
+    }
+
+    public function addChat(Chat $chat): self
+    {
+        if (!$this->chats->contains($chat)) {
+            $this->chats[] = $chat;
+            $chat->setPromo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChat(Chat $chat): self
+    {
+        if ($this->chats->contains($chat)) {
+            $this->chats->removeElement($chat);
+            // set the owning side to null (unless already changed)
+            if ($chat->getPromo() === $this) {
+                $chat->setPromo(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

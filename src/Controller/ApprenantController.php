@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 use App\Repository\ProfilRepository;
 use App\Repository\ApprenantRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ProfilSortieRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
