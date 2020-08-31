@@ -2,11 +2,15 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\GroupeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\Brief;
+use App\Entity\Apprenant;
+use App\Entity\Formateur;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\GroupeRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=GroupeRepository::class)
@@ -42,16 +46,19 @@ class Groupe
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @groups({"briefPromo:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefPromo:read"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefPromo:read"})
      */
     private $type;
 
@@ -85,10 +92,17 @@ class Groupe
      */
     private $apprenants;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Brief::class, mappedBy="groupe")
+     * @groups({"briefPromo:read"})
+     */
+    private $briefs;
+
     public function __construct()
     {
         $this->formateurs = new ArrayCollection();
         $this->apprenants = new ArrayCollection();
+        $this->briefs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -215,6 +229,34 @@ class Groupe
     {
         if ($this->apprenants->contains($apprenant)) {
             $this->apprenants->removeElement($apprenant);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Brief[]
+     */
+    public function getBriefs(): Collection
+    {
+        return $this->briefs;
+    }
+
+    public function addBrief(Brief $brief): self
+    {
+        if (!$this->briefs->contains($brief)) {
+            $this->briefs[] = $brief;
+            $brief->addGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrief(Brief $brief): self
+    {
+        if ($this->briefs->contains($brief)) {
+            $this->briefs->removeElement($brief);
+            $brief->removeGroupe($this);
         }
 
         return $this;

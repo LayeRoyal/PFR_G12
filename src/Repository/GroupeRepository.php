@@ -19,6 +19,19 @@ class GroupeRepository extends ServiceEntityRepository
         parent::__construct($registry, Groupe::class);
     }
 
+    public function getGroup($id, $num){
+
+        return $this->createQueryBuilder('g')
+        ->andWhere('g.id= :val')
+        ->andWhere('g.promo = :valu')
+        ->setParameter('val', $num)
+        ->setParameter('valu', $id)
+        ->setMaxResults(1)
+        ->getQuery()
+        ->getResult()
+    ;
+    }
+
     // /**
     //  * @return Groupe[] Returns an array of Groupe objects
     //  */

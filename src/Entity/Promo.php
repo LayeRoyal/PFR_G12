@@ -7,6 +7,7 @@ use App\Repository\PromoRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PromoRepository::class)
@@ -88,31 +89,37 @@ class Promo
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @groups({"briefs_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $langue;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $titre;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $lieu;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $referenceAgate;
 
@@ -144,6 +151,7 @@ class Promo
 
     /**
      * @ORM\OneToMany(targetEntity=Groupe::class, mappedBy="promo")
+     * @groups({"briefPromo:read"})
      */
     private $groupes;
 
@@ -162,11 +170,17 @@ class Promo
      */
     private $apprenants;
 
+    /**
+     * @ORM\OneToMany(targetEntity=PromoBrief::class, mappedBy="promo")
+     */
+    private $PromoBrief;
+
     public function __construct()
     {
         $this->groupes = new ArrayCollection();
         $this->formateurs = new ArrayCollection();
         $this->apprenants = new ArrayCollection();
+        $this->PromoBrief = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -387,6 +401,37 @@ class Promo
             // set the owning side to null (unless already changed)
                 $apprenant->setPromo(null);
             
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PromoBrief[]
+     */
+    public function getPromoBrief(): Collection
+    {
+        return $this->PromoBrief;
+    }
+
+    public function addPromoBrief(PromoBrief $promoBrief): self
+    {
+        if (!$this->PromoBrief->contains($promoBrief)) {
+            $this->PromoBrief[] = $promoBrief;
+            $promoBrief->setPromo($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromoBrief(PromoBrief $promoBrief): self
+    {
+        if ($this->PromoBrief->contains($promoBrief)) {
+            $this->PromoBrief->removeElement($promoBrief);
+            // set the owning side to null (unless already changed)
+            if ($promoBrief->getPromo() === $this) {
+                $promoBrief->setPromo(null);
+            }
         }
 
         return $this;

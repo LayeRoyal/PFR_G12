@@ -7,6 +7,7 @@ use App\Repository\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
@@ -38,16 +39,19 @@ class Tag
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @groups({"briefs_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @groups({"briefs_read"})
      */
     private $descriptif;
 
@@ -56,10 +60,16 @@ class Tag
      */
     private $groupeTags;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Brief::class, mappedBy="tag")
+     */
+    private $briefs;
+
 
     public function __construct()
     {
         $this->groupeTags = new ArrayCollection();
+        $this->briefs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -112,6 +122,34 @@ class Tag
     {
         if ($this->groupeTags->contains($groupeTag)) {
             $this->groupeTags->removeElement($groupeTag);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Brief[]
+     */
+    public function getBriefs(): Collection
+    {
+        return $this->briefs;
+    }
+
+    public function addBrief(Brief $brief): self
+    {
+        if (!$this->briefs->contains($brief)) {
+            $this->briefs[] = $brief;
+            $brief->addTag($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrief(Brief $brief): self
+    {
+        if ($this->briefs->contains($brief)) {
+            $this->briefs->removeElement($brief);
+            $brief->removeTag($this);
         }
 
         return $this;

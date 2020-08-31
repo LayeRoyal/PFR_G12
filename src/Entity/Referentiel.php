@@ -45,21 +45,21 @@ class Referentiel
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"ref_read"})
+     * @Groups({"ref_read","briefs_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message = "libelle can't be null")
-     * @Groups({"ref_read"})
+     * @Groups({"ref_read","briefs_read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank(message = "presentation can't be null")
-     * @Groups({"ref_read"})
+     * @Groups({"ref_read","briefs_read"})
      */
     private $presentation;
 
@@ -96,10 +96,16 @@ class Referentiel
      */
     private $archivage;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Brief::class, mappedBy="referentiel")
+     */
+    private $briefs;
+
     public function __construct()
     {
         $this->groupeCompetences = new ArrayCollection();
         $this->promos = new ArrayCollection();
+        $this->briefs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -233,6 +239,37 @@ class Referentiel
     public function setArchivage(bool $archivage): self
     {
         $this->archivage = $archivage;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Brief[]
+     */
+    public function getBriefs(): Collection
+    {
+        return $this->briefs;
+    }
+
+    public function addBrief(Brief $brief): self
+    {
+        if (!$this->briefs->contains($brief)) {
+            $this->briefs[] = $brief;
+            $brief->setReferentiel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrief(Brief $brief): self
+    {
+        if ($this->briefs->contains($brief)) {
+            $this->briefs->removeElement($brief);
+            // set the owning side to null (unless already changed)
+            if ($brief->getReferentiel() === $this) {
+                $brief->setReferentiel(null);
+            }
+        }
 
         return $this;
     }

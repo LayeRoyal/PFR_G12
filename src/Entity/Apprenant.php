@@ -60,10 +60,16 @@ class Apprenant extends User
      */
     private $promo;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=PromoBrief::class, mappedBy="statutBrief")
+     */
+    private $promoBriefs;
+
     public function __construct()
     {
         parent::__construct();
         $this->groupes = new ArrayCollection();
+        $this->promoBriefs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -130,6 +136,34 @@ class Apprenant extends User
     public function setPromo(?Promo $promo): self
     {
         $this->promo = $promo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PromoBrief[]
+     */
+    public function getPromoBriefs(): Collection
+    {
+        return $this->promoBriefs;
+    }
+
+    public function addPromoBrief(PromoBrief $promoBrief): self
+    {
+        if (!$this->promoBriefs->contains($promoBrief)) {
+            $this->promoBriefs[] = $promoBrief;
+            $promoBrief->addStatutBrief($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromoBrief(PromoBrief $promoBrief): self
+    {
+        if ($this->promoBriefs->contains($promoBrief)) {
+            $this->promoBriefs->removeElement($promoBrief);
+            $promoBrief->removeStatutBrief($this);
+        }
 
         return $this;
     }
