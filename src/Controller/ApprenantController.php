@@ -28,6 +28,7 @@ class ApprenantController extends AbstractController
         $apprenant = $request->request->all();
         $avatar = $request->files->get("avatar");
         $genre=$apprenant['genre'];
+         $promo=$apprenant['promo'];
         $avatar = fopen($avatar->getRealPath(), "rb");
         $apprenant["avatar"] = $avatar;
         $username = $apprenant['username'];
@@ -49,7 +50,8 @@ class ApprenantController extends AbstractController
         }
         $password = randomPassword();
         $apprenant->setPassword($encoder->encodePassword($apprenant, $password))
-             ->setGenre($genre);
+             ->setGenre($genre)
+             ->setPromo($promo);
         $manager->persist($apprenant);
         $manager->flush();
         //Envoi de l'Email de confirmation 

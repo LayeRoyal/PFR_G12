@@ -56,10 +56,16 @@ class Tag
      */
     private $groupeTags;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Brief::class, mappedBy="tags")
+     */
+    private $briefs;
+
 
     public function __construct()
     {
         $this->groupeTags = new ArrayCollection();
+        $this->briefs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -112,6 +118,34 @@ class Tag
     {
         if ($this->groupeTags->contains($groupeTag)) {
             $this->groupeTags->removeElement($groupeTag);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Brief[]
+     */
+    public function getBriefs(): Collection
+    {
+        return $this->briefs;
+    }
+
+    public function addBrief(Brief $brief): self
+    {
+        if (!$this->briefs->contains($brief)) {
+            $this->briefs[] = $brief;
+            $brief->addTag($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrief(Brief $brief): self
+    {
+        if ($this->briefs->contains($brief)) {
+            $this->briefs->removeElement($brief);
+            $brief->removeTag($this);
         }
 
         return $this;

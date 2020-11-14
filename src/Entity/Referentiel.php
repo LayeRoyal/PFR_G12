@@ -83,6 +83,7 @@ class Referentiel
 
     /**
      * @ORM\ManyToMany(targetEntity=GroupeCompetence::class, inversedBy="referentiels")
+     * @Groups({"sc_read"})
      */
     private $groupeCompetences;
 
@@ -96,10 +97,22 @@ class Referentiel
      */
     private $archivage;
 
+    /**
+     * @ORM\OneToMany(targetEntity=StatisticCompetence::class, mappedBy="referentiel")
+     */
+    private $statisticCompetences;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Brief::class, mappedBy="referentiel")
+     */
+    private $briefs;
+
     public function __construct()
     {
         $this->groupeCompetences = new ArrayCollection();
         $this->promos = new ArrayCollection();
+        $this->statisticCompetences = new ArrayCollection();
+        $this->briefs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -233,6 +246,68 @@ class Referentiel
     public function setArchivage(bool $archivage): self
     {
         $this->archivage = $archivage;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|StatisticCompetence[]
+     */
+    public function getStatisticCompetences(): Collection
+    {
+        return $this->statisticCompetences;
+    }
+
+    public function addStatisticCompetence(StatisticCompetence $statisticCompetence): self
+    {
+        if (!$this->statisticCompetences->contains($statisticCompetence)) {
+            $this->statisticCompetences[] = $statisticCompetence;
+            $statisticCompetence->setReferentiel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStatisticCompetence(StatisticCompetence $statisticCompetence): self
+    {
+        if ($this->statisticCompetences->contains($statisticCompetence)) {
+            $this->statisticCompetences->removeElement($statisticCompetence);
+            // set the owning side to null (unless already changed)
+            if ($statisticCompetence->getReferentiel() === $this) {
+                $statisticCompetence->setReferentiel(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Brief[]
+     */
+    public function getBriefs(): Collection
+    {
+        return $this->briefs;
+    }
+
+    public function addBrief(Brief $brief): self
+    {
+        if (!$this->briefs->contains($brief)) {
+            $this->briefs[] = $brief;
+            $brief->setReferentiel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBrief(Brief $brief): self
+    {
+        if ($this->briefs->contains($brief)) {
+            $this->briefs->removeElement($brief);
+            // set the owning side to null (unless already changed)
+            if ($brief->getReferentiel() === $this) {
+                $brief->setReferentiel(null);
+            }
+        }
 
         return $this;
     }

@@ -41,6 +41,21 @@ class NiveauEvaluation
      */
     private $competence;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=LivrablePartiel::class, mappedBy="niveaux")
+     */
+    private $livrablePartiels;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Brief::class, inversedBy="niveauEvaluations")
+     */
+    private $brief;
+
+    public function __construct()
+    {
+        $this->livrablePartiels = new ArrayCollection();
+    }
+
     
     public function getId(): ?int
     {
@@ -91,6 +106,46 @@ class NiveauEvaluation
     public function setCompetence(?Competence $competence): self
     {
         $this->competence = $competence;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|LivrablePartiel[]
+     */
+    public function getLivrablePartiels(): Collection
+    {
+        return $this->livrablePartiels;
+    }
+
+    public function addLivrablePartiel(LivrablePartiel $livrablePartiel): self
+    {
+        if (!$this->livrablePartiels->contains($livrablePartiel)) {
+            $this->livrablePartiels[] = $livrablePartiel;
+            $livrablePartiel->addNiveau($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLivrablePartiel(LivrablePartiel $livrablePartiel): self
+    {
+        if ($this->livrablePartiels->contains($livrablePartiel)) {
+            $this->livrablePartiels->removeElement($livrablePartiel);
+            $livrablePartiel->removeNiveau($this);
+        }
+
+        return $this;
+    }
+
+    public function getBrief(): ?Brief
+    {
+        return $this->brief;
+    }
+
+    public function setBrief(?Brief $brief): self
+    {
+        $this->brief = $brief;
 
         return $this;
     }

@@ -141,7 +141,7 @@ class PromoController extends AbstractController
 
     /**
     * @Route(
-    *     path="api/admin/promo/{id}/referentiels",
+    *     path="api/admin/promo/{id<[0-9]+>}/referentiels",
     *     methods={"GET"},
     *     defaults={
     *         "__controller"="\app\Controller\PromoController::getReferentielPromo",

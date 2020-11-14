@@ -53,19 +53,16 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"user_read","user_details_read"})
+     * @Groups({"user_read","user_details_read","stats_read"})
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"user_read","user_details_read"})
+     * @Groups({"user_read","user_details_read","stats_read","comment_read"})
      */
     protected $username;
 
-    /**
-     * @Groups({"user_read","user_details_read"})
-     */
     protected $roles = [];
 
     /**
@@ -77,21 +74,21 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="blob", nullable=false)
      * @Assert\NotBlank(message = "avatar can't be null")
-     * @Groups({"user_details_read"})
+     * @Groups({"user_details_read","comment_read"})
      */
     protected $avatar;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message = "prenom can't be null")
-     * @Groups({"user_read","user_details_read"})
+     * @Groups({"user_read","user_details_read","stats_read","comment_read"})
      */
     protected $prenom;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank(message = "nom can't be null")
-     * @Groups({"user_read","user_details_read"})
+     * @Groups({"user_read","user_details_read","stats_read","comment_read"})
      */
     protected $nom;
 
@@ -101,7 +98,7 @@ class User implements UserInterface
      * @Assert\Email(
      *  message = "Email '{{ value }}' is not valid!."
      *)
-     *@Groups({"user_details_read"})
+     *@Groups({"user_details_read","comment_read","stats_read"})
      */
     protected $email;
 
@@ -125,6 +122,7 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=ProfilSortie::class, mappedBy="createdBy")
+     * @Groups({"stats_read"})
      */
     private $profilSorties;
 
@@ -217,7 +215,6 @@ class User implements UserInterface
     public function getAvatar()
     {
         $data = stream_get_contents($this->avatar);
-        fclose($this->avatar);
 
        return base64_encode($data);
     }
@@ -227,6 +224,7 @@ class User implements UserInterface
         $this->avatar = $avatar;
 
         return $this;
+        // $commentaire -> setFormateur($formateur);
     }
 
     public function getPrenom(): ?string

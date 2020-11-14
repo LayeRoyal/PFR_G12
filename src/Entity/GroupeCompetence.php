@@ -59,6 +59,7 @@ class GroupeCompetence
 
      /**
      * @ORM\ManyToMany(targetEntity=Competence::class, inversedBy="groupecompetences", cascade={"persist"})
+     * @Groups({"sc_read"})
      */
     private $competence;
 

@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\PromoRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PromoRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PromoRepository::class)
@@ -98,6 +99,7 @@ class Promo
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"promo_read"})
      */
     private $titre;
 
@@ -162,11 +164,23 @@ class Promo
      */
     private $apprenants;
 
+    /**
+     * @ORM\OneToMany(targetEntity=PromoBrief::class, mappedBy="promo")
+     */
+    private $promoBriefs;
+
+    /**
+     * @ORM\OneToMany(targetEntity=StatisticCompetence::class, mappedBy="promo")
+     */
+    private $statisticCompetences;
+
     public function __construct()
     {
         $this->groupes = new ArrayCollection();
         $this->formateurs = new ArrayCollection();
         $this->apprenants = new ArrayCollection();
+        $this->promoBriefs = new ArrayCollection();
+        $this->statisticCompetences = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -387,6 +401,68 @@ class Promo
             // set the owning side to null (unless already changed)
                 $apprenant->setPromo(null);
             
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PromoBrief[]
+     */
+    public function getPromoBriefs(): Collection
+    {
+        return $this->promoBriefs;
+    }
+
+    public function addPromoBrief(PromoBrief $promoBrief): self
+    {
+        if (!$this->promoBriefs->contains($promoBrief)) {
+            $this->promoBriefs[] = $promoBrief;
+            $promoBrief->setPromo($this);
+        }
+
+        return $this;
+    }
+
+    public function removePromoBrief(PromoBrief $promoBrief): self
+    {
+        if ($this->promoBriefs->contains($promoBrief)) {
+            $this->promoBriefs->removeElement($promoBrief);
+            // set the owning side to null (unless already changed)
+            if ($promoBrief->getPromo() === $this) {
+                $promoBrief->setPromo(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|StatisticCompetence[]
+     */
+    public function getStatisticCompetences(): Collection
+    {
+        return $this->statisticCompetences;
+    }
+
+    public function addStatisticCompetence(StatisticCompetence $statisticCompetence): self
+    {
+        if (!$this->statisticCompetences->contains($statisticCompetence)) {
+            $this->statisticCompetences[] = $statisticCompetence;
+            $statisticCompetence->setPromo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStatisticCompetence(StatisticCompetence $statisticCompetence): self
+    {
+        if ($this->statisticCompetences->contains($statisticCompetence)) {
+            $this->statisticCompetences->removeElement($statisticCompetence);
+            // set the owning side to null (unless already changed)
+            if ($statisticCompetence->getPromo() === $this) {
+                $statisticCompetence->setPromo(null);
+            }
         }
 
         return $this;

@@ -23,8 +23,8 @@ class GroupeTagController extends AbstractController
     */
     public function createGrpTag(TagRepository $repo, Request $req , SerializerInterface $serializer, EntityManagerInterface $manager)
     {
-         $grpTag=$req->getContent();
-        $tab_grpTag = $serializer->decode($grpTag,"json");
+    $grpTag=$req->getContent();
+$tab_grpTag = $serializer->decode($grpTag,"json");
 
         $newGrpTag= new GroupeTag();
         $newGrpTag->setLibelle($tab_grpTag['libelle']);

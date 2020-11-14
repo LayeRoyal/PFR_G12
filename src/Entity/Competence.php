@@ -8,6 +8,7 @@ use App\Repository\CompetenceRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
@@ -38,16 +39,19 @@ class Competence
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"sc_read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"stats_read","sc_read"})
      */
     private $libelle;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"stats_read","sc_read"})
      */
     private $descriptif;
 
@@ -67,10 +71,16 @@ class Competence
      */
     private $archivage;
 
+    /**
+     * @ORM\OneToMany(targetEntity=StatisticCompetence::class, mappedBy="competence")
+     */
+    private $statisticCompetences;
+
     public function __construct()
     {
         $this->groupeCompetences = new ArrayCollection();
         $this->niveauEvaluations = new ArrayCollection();
+        $this->statisticCompetences = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -169,6 +179,37 @@ class Competence
     public function setArchivage(bool $archivage): self
     {
         $this->archivage = $archivage;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|StatisticCompetence[]
+     */
+    public function getStatisticCompetences(): Collection
+    {
+        return $this->statisticCompetences;
+    }
+
+    public function addStatisticCompetence(StatisticCompetence $statisticCompetence): self
+    {
+        if (!$this->statisticCompetences->contains($statisticCompetence)) {
+            $this->statisticCompetences[] = $statisticCompetence;
+            $statisticCompetence->setCompetence($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStatisticCompetence(StatisticCompetence $statisticCompetence): self
+    {
+        if ($this->statisticCompetences->contains($statisticCompetence)) {
+            $this->statisticCompetences->removeElement($statisticCompetence);
+            // set the owning side to null (unless already changed)
+            if ($statisticCompetence->getCompetence() === $this) {
+                $statisticCompetence->setCompetence(null);
+            }
+        }
 
         return $this;
     }
